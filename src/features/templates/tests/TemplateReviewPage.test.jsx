@@ -76,6 +76,28 @@ describe('TemplateReviewPage', () => {
     expect(createTemplate).not.toHaveBeenCalled();
   });
 
+  it('al corregir un dato se quita su error sin tener que guardar de nuevo', async () => {
+    const user = userEvent.setup();
+    renderReview('/templates/new');
+
+    await user.click(screen.getByRole('button', { name: 'Guardar plantilla' }));
+    expect(
+      await screen.findByText('Nombre del formulario: El formulario necesita un título.'),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/Nombre del formulario/), 'FFF');
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText('Nombre del formulario: El formulario necesita un título.'),
+      ).not.toBeInTheDocument();
+    });
+    expect(screen.getByRole('heading', { name: /dato\(s\) por revisar/ })).toBeInTheDocument();
+    expect(
+      screen.getByText('Sección 1: La sección necesita un título.'),
+    ).toBeInTheDocument();
+  });
+
   it('crea la plantilla después de confirmar y abre su detalle', async () => {
     const user = userEvent.setup();
     createTemplate.mockResolvedValue(savedTemplate());

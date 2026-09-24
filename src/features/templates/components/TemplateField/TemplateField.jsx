@@ -14,6 +14,11 @@ export default function TemplateField({ field, number }) {
         <div className="template-field__tags">
           <Badge>{FIELD_TYPE_LABELS[field.type] ?? field.type}</Badge>
           {field.unit && <Badge tone="info">Unidad: {field.unit}</Badge>}
+          {field.options?.length > 0 && (
+            <Badge tone="info">
+              {field.options.length} opción{field.options.length === 1 ? '' : 'es'}
+            </Badge>
+          )}
           {field.required && <Badge tone="warning">Obligatoria</Badge>}
           {field.allow_evidence && <Badge tone="info">Foto de evidencia</Badge>}
         </div>

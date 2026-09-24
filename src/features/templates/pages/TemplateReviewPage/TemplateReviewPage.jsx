@@ -1,4 +1,4 @@
-import { useMemo, useReducer, useRef, useState } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ROUTES, paths } from '@/app/router/routes';
 import Button from '@/shared/components/Button/Button';
@@ -66,6 +66,15 @@ function TemplateReviewWorkspace({ template }) {
   const { allowNextNavigation } = useUnsavedChangesGuard(hasChanges);
   const errorsByPath = useMemo(() => groupErrorsByPath(errors), [errors]);
   const summaryMessages = useMemo(() => [...new Set(errors.map(describeError))], [errors]);
+
+  // Si ya había errores al guardar, al ir corrigiendo se quitan los que ya están bien
+  useEffect(() => {
+    setErrors((current) => {
+      if (current.length === 0) return current;
+      const result = validateFormDefinitionInput(draftToPayload(draft));
+      return result.ok ? [] : result.errors;
+    });
+  }, [draft]);
 
   const showErrors = (nextErrors) => {
     setErrors(nextErrors);

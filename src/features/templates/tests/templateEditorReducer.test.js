@@ -77,6 +77,31 @@ describe('templateEditorReducer', () => {
     expect(next.sections[0].fields[0].unit).toBe('');
   });
 
+  it('arranca con 2 opciones vacías al pasar a lista y las limpia al salir', () => {
+    const draft = createEmptyDraft();
+    const [section] = draft.sections;
+    const fieldUid = section.fields[0].uid;
+
+    const asSelect = reduce(draft, {
+      type: EDITOR_ACTIONS.UPDATE_FIELD,
+      sectionUid: section.uid,
+      fieldUid,
+      changes: { type: FIELD_TYPES.SELECT },
+    });
+    expect(asSelect.sections[0].fields[0].options).toEqual([
+      { value: '', label: '' },
+      { value: '', label: '' },
+    ]);
+
+    const asText = reduce(asSelect, {
+      type: EDITOR_ACTIONS.UPDATE_FIELD,
+      sectionUid: section.uid,
+      fieldUid,
+      changes: { type: FIELD_TYPES.SHORT_TEXT },
+    });
+    expect(asText.sections[0].fields[0].options).toEqual([]);
+  });
+
   it('avisa si llega una acción desconocida', () => {
     expect(() => templateEditorReducer(createEmptyDraft(), { type: 'otra' })).toThrow();
   });

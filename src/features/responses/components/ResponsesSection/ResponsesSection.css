@@ -1,0 +1,36 @@
+.responses-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.responses-section__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.responses-section__title {
+  font-size: var(--font-size-lg);
+}
+
+.responses-section__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.responses-section__more {
+  display: flex;
+  justify-content: center;
+}
+
+.responses-section__error {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}

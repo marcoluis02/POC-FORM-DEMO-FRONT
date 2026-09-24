@@ -1,0 +1,11 @@
+.start-response-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.start-response-modal__message {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}

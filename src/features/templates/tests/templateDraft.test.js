@@ -64,6 +64,32 @@ describe('templateDraft', () => {
     expect(draftToPayload(draft).sections[0].fields[1]).not.toHaveProperty('unit');
   });
 
+  it('manda las opciones solo en campos de lista', () => {
+    let draft = draftFromDefinition(maintenanceTemplate);
+    const sectionUid = draft.sections[0].uid;
+    const fieldUid = draft.sections[0].fields[0].uid;
+
+    draft = reduce(draft, {
+      type: EDITOR_ACTIONS.UPDATE_FIELD,
+      sectionUid,
+      fieldUid,
+      changes: {
+        type: FIELD_TYPES.SELECT,
+        options: [
+          { value: 'Bien', label: 'Bien' },
+          { value: 'Mal', label: 'Mal' },
+        ],
+      },
+    });
+
+    const selectField = draftToPayload(draft).sections[0].fields[0];
+    expect(selectField.options).toEqual([
+      { value: 'Bien', label: 'Bien' },
+      { value: 'Mal', label: 'Mal' },
+    ]);
+    expect(draftToPayload(draft).sections[0].fields[1]).not.toHaveProperty('options');
+  });
+
   it('un borrador nuevo sin llenar no pasa la validación', () => {
     const draft = reduce(draftFromDefinition(maintenanceTemplate), {
       type: EDITOR_ACTIONS.RESET,
