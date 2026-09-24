@@ -1,0 +1,93 @@
+:root {
+  /* Colores de marca */
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-primary-soft: #dbeafe;
+  --color-on-primary: #ffffff;
+
+  /* Fondos y bordes */
+  --color-bg: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-border: #d6dde8;
+  --color-border-strong: #94a3b8;
+  --color-overlay: rgb(15 23 42 / 55%);
+
+  /* Texto */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-on-dark: #ffffff;
+
+  /* Estados */
+  --color-success: #15803d;
+  --color-success-soft: #dcfce7;
+  --color-warning: #b45309;
+  --color-warning-soft: #fef3c7;
+  --color-danger: #b91c1c;
+  --color-danger-hover: #991b1b;
+  --color-danger-soft: #fee2e2;
+  --color-info: #1d4ed8;
+  --color-info-soft: #dbeafe;
+  --color-focus: #2563eb;
+
+  /* Tipografía */
+  --font-sans: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  --font-size-xs: 0.8125rem;
+  --font-size-sm: 0.9375rem;
+  --font-size-md: 1.0625rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.875rem;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.55;
+
+  /* Espacios */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Bordes y sombras */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+  --border-width: 1px;
+  --border-width-strong: 2px;
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 8%);
+  --shadow-md: 0 4px 12px rgb(15 23 42 / 10%);
+  --shadow-lg: 0 16px 40px rgb(15 23 42 / 18%);
+  --focus-ring: 0 0 0 3px rgb(37 99 235 / 35%);
+
+  /* Tamaños de controles (grandes para tocar fácil en celular) */
+  --control-height: 3rem;
+  --control-height-lg: 3.5rem;
+  --checkbox-size: 1.5rem;
+  --icon-size: 1.25rem;
+  --loader-size: 2.75rem;
+  --loader-size-sm: 1.25rem;
+  --loader-stroke: 4px;
+
+  /* Layout */
+  --layout-max-width: 960px;
+  --modal-max-width: 480px;
+  --toast-max-width: 420px;
+  --header-height: 4rem;
+
+  /* Capas */
+  --z-header: 10;
+  --z-modal: 100;
+  --z-toast: 200;
+
+  /* Movimiento */
+  --transition-fast: 120ms ease;
+  --transition-normal: 200ms ease;
+}

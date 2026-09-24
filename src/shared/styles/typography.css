@@ -1,0 +1,33 @@
+body {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+}
+
+h1,
+h2,
+h3 {
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+}
+
+h1 {
+  font-size: var(--font-size-2xl);
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+}
+
+h3 {
+  font-size: var(--font-size-lg);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-small {
+  font-size: var(--font-size-sm);
+}

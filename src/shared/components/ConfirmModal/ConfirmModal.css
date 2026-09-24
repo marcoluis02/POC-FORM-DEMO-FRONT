@@ -1,0 +1,4 @@
+.confirm-modal__message {
+  font-size: var(--font-size-md);
+  color: var(--text-secondary);
+}
