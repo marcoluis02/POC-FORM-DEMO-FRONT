@@ -17,7 +17,10 @@ function matchesAccept(file, accept) {
     });
 }
 
-// Regresa un mensaje entendible si el archivo no sirve, o null si todo está bien
+// Solo es ayuda visual para avisar rápido al usuario. No garantiza nada:
+// file.type y el nombre los puede cambiar cualquiera. El backend revisa el archivo real
+// (tipo por su contenido, tamaño y páginas del PDF) y es quien decide si se acepta.
+// Regresa un mensaje entendible si el archivo no sirve, o null si todo está bien.
 export function validateFile(file, { accept, maxSizeMb } = {}) {
   if (!matchesAccept(file, accept)) {
     return 'Este tipo de archivo no está permitido.';

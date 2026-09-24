@@ -2,7 +2,7 @@ import Loader from '@/shared/components/Loader/Loader';
 import { classNames } from '@/shared/utils/classNames';
 import './Button.css';
 
-// variant: primary | secondary | danger | ghost    size: md | lg
+// variant: primary | secondary | danger | ghost | ghost-danger    size: sm | md | lg
 export default function Button({
   variant = 'primary',
   size = 'md',

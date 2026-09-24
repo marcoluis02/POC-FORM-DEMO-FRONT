@@ -15,6 +15,8 @@
 .app-layout__header-inner {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
   width: 100%;
   max-width: var(--layout-max-width);
   min-height: var(--header-height);
@@ -27,6 +29,22 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   text-decoration: none;
+}
+
+.app-layout__nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--text-on-dark);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+.app-layout__nav-link:hover,
+.app-layout__nav-link.active {
+  background: var(--color-primary-hover);
 }
 
 .app-layout__main {

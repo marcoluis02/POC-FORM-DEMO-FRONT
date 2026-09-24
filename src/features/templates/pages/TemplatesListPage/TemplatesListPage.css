@@ -1,0 +1,32 @@
+.templates-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.templates-list__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.templates-list__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.templates-list__more {
+  display: flex;
+  justify-content: center;
+}
+
+.templates-list__error {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}

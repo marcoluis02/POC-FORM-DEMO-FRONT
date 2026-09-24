@@ -19,7 +19,16 @@ function readPositiveNumber(name) {
 export const env = Object.freeze({
   apiUrl: readRequired('VITE_API_URL').replace(/\/+$/, ''),
   apiTimeoutMs: readPositiveNumber('VITE_API_TIMEOUT_MS'),
+  uploadTimeoutMs: readPositiveNumber('VITE_UPLOAD_TIMEOUT_MS'),
+  maxUploadMb: readPositiveNumber('VITE_MAX_UPLOAD_MB'),
+  maxPdfPages: readPositiveNumber('VITE_MAX_PDF_PAGES'),
   endpoints: Object.freeze({
     health: readRequired('VITE_ENDPOINT_HEALTH'),
+    templates: readRequired('VITE_ENDPOINT_TEMPLATES'),
+    templateDetail: readRequired('VITE_ENDPOINT_TEMPLATE_DETAIL'),
+    templateVersions: readRequired('VITE_ENDPOINT_TEMPLATE_VERSIONS'),
+    templateVersionDetail: readRequired('VITE_ENDPOINT_TEMPLATE_VERSION_DETAIL'),
+    imports: readRequired('VITE_ENDPOINT_IMPORTS'),
+    importDetail: readRequired('VITE_ENDPOINT_IMPORT_DETAIL'),
   }),
 });

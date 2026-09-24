@@ -11,6 +11,7 @@
   font-weight: var(--font-weight-semibold);
   line-height: 1;
   text-align: center;
+  text-decoration: none;
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast),
@@ -24,6 +25,11 @@
 .button--lg {
   min-height: var(--control-height-lg);
   font-size: var(--font-size-lg);
+}
+
+/* Mismo alto para tocar fácil, menos relleno a los lados */
+.button--sm {
+  padding: 0 var(--space-3);
 }
 
 .button--full {
@@ -65,4 +71,13 @@
 
 .button--ghost:not(:disabled):hover {
   background: var(--color-primary-soft);
+}
+
+.button--ghost-danger {
+  background: transparent;
+  color: var(--color-danger);
+}
+
+.button--ghost-danger:not(:disabled):hover {
+  background: var(--color-danger-soft);
 }

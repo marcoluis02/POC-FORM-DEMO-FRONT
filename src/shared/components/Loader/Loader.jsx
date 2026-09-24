@@ -5,7 +5,7 @@ import './Loader.css';
 export default function Loader({ label = 'Cargando...', size = 'md', fullPage = false }) {
   return (
     <div
-      className={classNames('loader', fullPage && 'loader--page')}
+      className={classNames('loader', `loader--${size}`, fullPage && 'loader--page')}
       role="status"
       aria-live="polite"
     >
