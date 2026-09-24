@@ -1,0 +1,21 @@
+.input {
+  display: flex;
+  align-items: stretch;
+}
+
+.input--with-unit .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input__unit {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-4);
+  border: var(--border-width-strong) solid var(--color-border);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--color-surface-muted);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+}

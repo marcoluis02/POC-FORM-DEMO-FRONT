@@ -1,0 +1,64 @@
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form-field__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.form-field__required {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.form-field__hint {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.form-field__error {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Estilo base que comparten Input y Select */
+.form-control {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  border: var(--border-width-strong) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  transition: border-color var(--transition-fast);
+}
+
+.form-control:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+.form-control:focus-visible {
+  border-color: var(--color-focus);
+}
+
+.form-control:disabled {
+  background: var(--color-surface-muted);
+  color: var(--text-muted);
+}
+
+.form-control[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}

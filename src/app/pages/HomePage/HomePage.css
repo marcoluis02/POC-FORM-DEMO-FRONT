@@ -1,0 +1,10 @@
+.home-page__card-title {
+  font-size: var(--font-size-lg);
+}
+
+.home-page__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
