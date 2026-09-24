@@ -9,7 +9,7 @@ import FileUploader from '@/shared/components/FileUploader/FileUploader';
 import { useToast } from '@/shared/components/Toast/useToast';
 import './OriginalDocumentViewer.css';
 
-const UPLOAD_HINT = `Opcional. Sube la foto o el PDF del formato en papel (JPG, PNG, WEBP o PDF, máximo ${DOCUMENT_UPLOAD.maxSizeMb} MB). Se guarda junto con la plantilla.`;
+const UPLOAD_HINT = `Opcional. Sube la foto o el PDF del formato en papel (JPG, PNG, WEBP o PDF, máximo ${DOCUMENT_UPLOAD.maxSizeMb} MB y ${DOCUMENT_UPLOAD.maxPdfPages} páginas). Se guarda junto con la plantilla.`;
 
 // Foto o PDF del formato en papel junto al editor.
 // file/fileUrl: archivo elegido que aún no se sube. storedImportId: documento ya guardado de la plantilla.

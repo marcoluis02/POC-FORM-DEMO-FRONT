@@ -21,6 +21,7 @@ export const env = Object.freeze({
   apiTimeoutMs: readPositiveNumber('VITE_API_TIMEOUT_MS'),
   uploadTimeoutMs: readPositiveNumber('VITE_UPLOAD_TIMEOUT_MS'),
   maxUploadMb: readPositiveNumber('VITE_MAX_UPLOAD_MB'),
+  maxPdfPages: readPositiveNumber('VITE_MAX_PDF_PAGES'),
   endpoints: Object.freeze({
     health: readRequired('VITE_ENDPOINT_HEALTH'),
     templates: readRequired('VITE_ENDPOINT_TEMPLATES'),
