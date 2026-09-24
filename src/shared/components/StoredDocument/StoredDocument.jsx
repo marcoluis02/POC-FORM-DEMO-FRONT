@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import DocumentPreview from '@/shared/components/DocumentPreview/DocumentPreview';
 import ErrorState from '@/shared/components/ErrorState/ErrorState';
 import Loader from '@/shared/components/Loader/Loader';
-import { isPdf } from '../../domain/importRules';
-import { useImport } from '../../hooks/useImport';
-import DocumentPreview from '../DocumentPreview/DocumentPreview';
+import { isPdf } from '@/shared/domain/documentUpload';
+import { useImport } from '@/shared/hooks/useImport';
 
 // Documento ya guardado en el servidor. Si la URL firmada venció, "Intentar de nuevo" pide una nueva.
 export default function StoredDocument({ importId }) {

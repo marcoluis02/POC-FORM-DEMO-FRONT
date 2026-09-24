@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createImport } from '@/shared/api/importsApi';
+import { importKeys } from '@/shared/api/importKeys';
 import { useIdempotencyKey } from '@/shared/hooks/useIdempotencyKey';
 import { fileIdentity } from '@/shared/utils/fileIdentity';
-import { createImport } from '../api/importsApi';
-import { importKeys } from '../api/importKeys';
 
 // La clave no se libera al terminar: si después falla guardar la plantilla y se reintenta
 // con el mismo archivo, el backend regresa el mismo documento en vez de subirlo otra vez.
