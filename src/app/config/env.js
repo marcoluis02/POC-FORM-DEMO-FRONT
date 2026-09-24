@@ -22,6 +22,8 @@ export const env = Object.freeze({
   uploadTimeoutMs: readPositiveNumber('VITE_UPLOAD_TIMEOUT_MS'),
   maxUploadMb: readPositiveNumber('VITE_MAX_UPLOAD_MB'),
   maxPdfPages: readPositiveNumber('VITE_MAX_PDF_PAGES'),
+  maxPhotosPerField: readPositiveNumber('VITE_MAX_PHOTOS_PER_FIELD'),
+  draftAutosaveMs: readPositiveNumber('VITE_DRAFT_AUTOSAVE_MS'),
   endpoints: Object.freeze({
     health: readRequired('VITE_ENDPOINT_HEALTH'),
     templates: readRequired('VITE_ENDPOINT_TEMPLATES'),
@@ -30,5 +32,10 @@ export const env = Object.freeze({
     templateVersionDetail: readRequired('VITE_ENDPOINT_TEMPLATE_VERSION_DETAIL'),
     imports: readRequired('VITE_ENDPOINT_IMPORTS'),
     importDetail: readRequired('VITE_ENDPOINT_IMPORT_DETAIL'),
+    responses: readRequired('VITE_ENDPOINT_RESPONSES'),
+    responseDetail: readRequired('VITE_ENDPOINT_RESPONSE_DETAIL'),
+    responseSubmit: readRequired('VITE_ENDPOINT_RESPONSE_SUBMIT'),
+    responseAttachments: readRequired('VITE_ENDPOINT_RESPONSE_ATTACHMENTS'),
+    responseAttachmentDetail: readRequired('VITE_ENDPOINT_RESPONSE_ATTACHMENT_DETAIL'),
   }),
 });

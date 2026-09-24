@@ -1,7 +1,6 @@
+import { byPosition } from '@/shared/utils/byPosition';
 import TemplateField from '../TemplateField/TemplateField';
 import './TemplateDefinitionView.css';
-
-const byPosition = (a, b) => a.position - b.position;
 
 // Muestra todas las secciones y preguntas de una versión, sin poder editarlas
 export default function TemplateDefinitionView({ definition }) {

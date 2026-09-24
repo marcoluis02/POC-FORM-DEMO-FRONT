@@ -1,0 +1,55 @@
+.response-fill {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.response-fill__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.response-fill__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.response-fill__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.response-fill__notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Botones siempre visibles abajo mientras se contesta */
+.response-fill__footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.response-fill__footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

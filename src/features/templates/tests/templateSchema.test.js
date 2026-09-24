@@ -15,14 +15,51 @@ describe('templateSchema (contrato FormDefinition)', () => {
 
   it('acepta todos los tipos soportados', () => {
     const template = buildTemplate();
+    const sampleOptions = [
+      { value: 'a', label: 'Opción A' },
+      { value: 'b', label: 'Opción B' },
+    ];
     template.sections[0].fields = FIELD_TYPE_VALUES.map((type, index) => ({
       ...firstField(template),
       id: `f_${String(index + 1).padStart(3, '0')}`,
       type,
       position: index + 1,
+      unit: null,
+      options: type === 'select' ? sampleOptions : null,
     }));
 
     expect(validateFormDefinition(template).ok).toBe(true);
+  });
+
+  it('exige opciones en preguntas de lista', () => {
+    const template = buildTemplate();
+    firstField(template).type = 'select';
+    firstField(template).unit = null;
+    delete firstField(template).options;
+
+    const result = validateFormDefinition(template);
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContainEqual({
+      path: 'sections.0.fields.0.options',
+      message: 'Las preguntas de lista necesitan al menos 2 opciones.',
+    });
+  });
+
+  it('rechaza opciones en un campo que no es lista', () => {
+    const template = buildTemplate();
+    firstField(template).options = [
+      { value: 'a', label: 'A' },
+      { value: 'b', label: 'B' },
+    ];
+
+    const result = validateFormDefinition(template);
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContainEqual({
+      path: 'sections.0.fields.0.options',
+      message: 'Las opciones solo aplican a preguntas de tipo lista (select).',
+    });
   });
 
   it('rechaza un tipo no soportado', () => {

@@ -6,12 +6,18 @@ import { MOVE_DIRECTION } from '../../domain/templateEditorReducer';
 import { TEMPLATE_LIMITS } from '../../domain/templateSchema';
 import './TemplateSection.css';
 
-const FIELD_ERROR_KEYS = ['label', 'type', 'unit'];
+const FIELD_ERROR_KEYS = ['label', 'type', 'unit', 'options'];
 
 function fieldErrors(errors, sectionIndex, fieldIndex) {
-  return Object.fromEntries(
+  const mapped = Object.fromEntries(
     FIELD_ERROR_KEYS.map((key) => [key, errors[errorPaths.field(sectionIndex, fieldIndex, key)]]),
   );
+  // Si Zod marca options.0.value, etc., se muestra junto al bloque de opciones
+  if (!mapped.options) {
+    const prefix = `${errorPaths.field(sectionIndex, fieldIndex, 'options')}.`;
+    mapped.options = Object.entries(errors).find(([path]) => path.startsWith(prefix))?.[1];
+  }
+  return mapped;
 }
 
 export default function TemplateSection({

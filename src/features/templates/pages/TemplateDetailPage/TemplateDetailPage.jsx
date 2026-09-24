@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 import { ROUTES, paths } from '@/app/router/routes';
 import StoredDocument from '@/features/imports/components/StoredDocument/StoredDocument';
+import ResponsesSection from '@/features/responses/components/ResponsesSection/ResponsesSection';
 import Badge from '@/shared/components/Badge/Badge';
 import Button from '@/shared/components/Button/Button';
 import ButtonLink from '@/shared/components/ButtonLink/ButtonLink';
@@ -161,6 +162,8 @@ export default function TemplateDetailPage() {
           </ButtonLink>
         </div>
       </header>
+
+      <ResponsesSection templateId={template.id} latestVersion={latestVersion} />
 
       {isLatest ? (
         <VersionContent version={template.current_version} />

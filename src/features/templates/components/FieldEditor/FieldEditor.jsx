@@ -2,12 +2,17 @@ import Button from '@/shared/components/Button/Button';
 import Checkbox from '@/shared/components/Checkbox/Checkbox';
 import Input from '@/shared/components/Input/Input';
 import Select from '@/shared/components/Select/Select';
-import { FIELD_TYPE_OPTIONS, supportsUnit } from '../../domain/fieldTypes';
+import {
+  FIELD_TYPE_OPTIONS,
+  createEmptyOption,
+  supportsOptions,
+  supportsUnit,
+} from '../../domain/fieldTypes';
 import { TEMPLATE_LIMITS } from '../../domain/templateSchema';
 import { MOVE_DIRECTION } from '../../domain/templateEditorReducer';
 import './FieldEditor.css';
 
-// Una pregunta del formulario. errors: { label, type, unit } con el mensaje de cada dato.
+// Una pregunta del formulario. errors: { label, type, unit, options } con el mensaje de cada dato.
 export default function FieldEditor({
   field,
   number,
@@ -21,6 +26,28 @@ export default function FieldEditor({
   onRemove,
 }) {
   const showUnit = supportsUnit(field.type);
+  const showChoices = supportsOptions(field.type);
+  const choices = field.options ?? [];
+  const canAddChoice = choices.length < TEMPLATE_LIMITS.maxOptions;
+  const canRemoveChoice = choices.length > TEMPLATE_LIMITS.minOptions;
+
+  function updateChoice(index, changes) {
+    onChange({
+      options: choices.map((option, optionIndex) =>
+        optionIndex === index ? { ...option, ...changes } : option,
+      ),
+    });
+  }
+
+  function addChoice() {
+    if (!canAddChoice) return;
+    onChange({ options: [...choices, createEmptyOption()] });
+  }
+
+  function removeChoice(index) {
+    if (!canRemoveChoice) return;
+    onChange({ options: choices.filter((_, optionIndex) => optionIndex !== index) });
+  }
 
   return (
     <li className="field-editor">
@@ -93,7 +120,60 @@ export default function FieldEditor({
         )}
       </div>
 
-      <div className="field-editor__options">
+      {showChoices && (
+        <div className="field-editor__choices">
+          <div className="field-editor__choices-header">
+            <span className="field-editor__choices-title">Opciones de la lista</span>
+            {canAddChoice && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={addChoice}
+                disabled={disabled}
+                aria-label={`Agregar opción a la pregunta ${number}`}
+              >
+                + Agregar opción
+              </Button>
+            )}
+          </div>
+          {errors.options && (
+            <p className="field-editor__choices-error" role="alert">
+              {errors.options}
+            </p>
+          )}
+          <ol className="field-editor__choices-list">
+            {choices.map((option, index) => (
+              <li key={index} className="field-editor__choice">
+                <Input
+                  label={`Opción ${index + 1}`}
+                  placeholder="Ej. Bueno"
+                  value={option.label}
+                  maxLength={TEMPLATE_LIMITS.optionLabelMaxLength}
+                  disabled={disabled}
+                  required
+                  onChange={(event) => {
+                    const text = event.target.value;
+                    updateChoice(index, { label: text, value: text });
+                  }}
+                />
+                {canRemoveChoice && (
+                  <Button
+                    variant="ghost-danger"
+                    size="sm"
+                    onClick={() => removeChoice(index)}
+                    disabled={disabled}
+                    aria-label={`Eliminar opción ${index + 1} de la pregunta ${number}`}
+                  >
+                    Quitar
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      <div className="field-editor__flags">
         <Checkbox
           label="Es obligatoria"
           checked={field.required}

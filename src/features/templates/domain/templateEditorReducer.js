@@ -1,4 +1,4 @@
-import { supportsUnit } from './fieldTypes';
+import { createEmptyOption, supportsOptions, supportsUnit } from './fieldTypes';
 import { createEmptyField, createEmptySection } from './templateDraft';
 import { TEMPLATE_LIMITS } from './templateSchema';
 
@@ -39,6 +39,14 @@ function applyFieldChanges(field, changes) {
   const next = { ...field, ...changes };
   // Si el campo deja de ser número, la unidad ya no aplica
   if (!supportsUnit(next.type)) next.unit = '';
+  // Si pasa a lista y no tiene opciones, arranca con 2 vacías; si deja de ser lista, se limpian
+  if (supportsOptions(next.type)) {
+    if (!next.options?.length) {
+      next.options = [createEmptyOption(), createEmptyOption()];
+    }
+  } else {
+    next.options = [];
+  }
   return next;
 }
 

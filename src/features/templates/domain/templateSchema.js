@@ -1,12 +1,16 @@
 // Espejo del contrato FormDefinition del backend (app/dto/form_definition.py).
 // El backend siempre vuelve a validar; esto solo detecta errores antes de renderizar o enviar.
 import { z } from '@/shared/lib/zod';
-import { FIELD_TYPE_VALUES, supportsUnit } from './fieldTypes';
+import { FIELD_TYPE_VALUES, supportsOptions, supportsUnit } from './fieldTypes';
 
 export const TEMPLATE_LIMITS = Object.freeze({
   titleMaxLength: 200,
   labelMaxLength: 300,
   unitMaxLength: 20,
+  optionValueMaxLength: 100,
+  optionLabelMaxLength: 200,
+  minOptions: 2,
+  maxOptions: 30,
   maxSections: 50,
   maxFieldsPerSection: 200,
 });
@@ -20,6 +24,21 @@ const positionSchema = z.number().int().min(1);
 
 const emptyTextToNull = (value) =>
   typeof value === 'string' && value.trim() === '' ? null : value;
+
+const emptyOptionsToNull = (value) => (value == null || value.length === 0 ? null : value);
+
+const fieldOptionSchema = z.strictObject({
+  value: z
+    .string()
+    .trim()
+    .min(1, { error: 'El valor de la opción no puede estar vacío.' })
+    .max(TEMPLATE_LIMITS.optionValueMaxLength),
+  label: z
+    .string()
+    .trim()
+    .min(1, { error: 'El texto de la opción no puede estar vacío.' })
+    .max(TEMPLATE_LIMITS.optionLabelMaxLength),
+});
 
 const fieldShape = {
   type: z.enum(FIELD_TYPE_VALUES, { error: 'Tipo de campo no soportado.' }),
@@ -35,6 +54,7 @@ const fieldShape = {
     emptyTextToNull,
     z.string().trim().max(TEMPLATE_LIMITS.unitMaxLength).nullish(),
   ),
+  options: z.preprocess(emptyOptionsToNull, z.array(fieldOptionSchema).nullish()),
 };
 
 function findRepeated(values) {
@@ -47,9 +67,53 @@ function findRepeated(values) {
 function buildFieldSchema(idSchema) {
   return z
     .strictObject({ id: idSchema, ...fieldShape })
-    .refine((field) => field.unit == null || supportsUnit(field.type), {
-      error: 'La unidad solo aplica a campos de tipo número.',
-      path: ['unit'],
+    .superRefine((field, ctx) => {
+      if (field.unit != null && !supportsUnit(field.type)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'La unidad solo aplica a campos de tipo número.',
+          path: ['unit'],
+        });
+      }
+
+      if (supportsOptions(field.type)) {
+        if (field.options == null) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'Las preguntas de lista necesitan al menos 2 opciones.',
+            path: ['options'],
+          });
+          return;
+        }
+        if (field.options.length < TEMPLATE_LIMITS.minOptions) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `Las preguntas de lista necesitan al menos ${TEMPLATE_LIMITS.minOptions} opciones.`,
+            path: ['options'],
+          });
+        }
+        if (field.options.length > TEMPLATE_LIMITS.maxOptions) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `Una pregunta de lista no puede tener más de ${TEMPLATE_LIMITS.maxOptions} opciones.`,
+            path: ['options'],
+          });
+        }
+        const repeated = findRepeated(field.options.map((option) => option.value));
+        if (repeated.length > 0) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `Hay opciones con el mismo valor: ${repeated.join(', ')}.`,
+            path: ['options'],
+          });
+        }
+      } else if (field.options != null) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Las opciones solo aplican a preguntas de tipo lista (select).',
+          path: ['options'],
+        });
+      }
     });
 }
 
