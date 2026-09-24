@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 import { ROUTES, paths } from '@/app/router/routes';
-import StoredDocument from '@/features/imports/components/StoredDocument/StoredDocument';
+import StoredDocument from '@/shared/components/StoredDocument/StoredDocument';
 import ResponsesSection from '@/features/responses/components/ResponsesSection/ResponsesSection';
 import Badge from '@/shared/components/Badge/Badge';
 import Button from '@/shared/components/Button/Button';

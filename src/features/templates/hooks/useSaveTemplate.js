@@ -1,4 +1,4 @@
-import { useCreateImport } from '@/features/imports/hooks/useCreateImport';
+import { useCreateImport } from '@/shared/hooks/useCreateImport';
 import { useCreateTemplate } from './useCreateTemplate';
 import { useCreateTemplateVersion } from './useCreateTemplateVersion';
 

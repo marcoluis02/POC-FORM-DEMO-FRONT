@@ -1,4 +1,4 @@
-import { DOCUMENT_UPLOAD } from '../../domain/importRules';
+import { DOCUMENT_UPLOAD } from '@/shared/domain/documentUpload';
 import './DocumentPreview.css';
 
 // Muestra una foto o un PDF. onError avisa si la imagen no se pudo cargar.

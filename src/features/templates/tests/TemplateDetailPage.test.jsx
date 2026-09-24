@@ -1,7 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getImport } from '@/features/imports/api/importsApi';
 import { createResponse, listResponses } from '@/features/responses/api/responsesApi';
+import { getImport } from '@/shared/api/importsApi';
 import { renderWithRouter } from '@/shared/tests/renderWithRouter';
 import { getTemplate, getTemplateVersion } from '../api/templatesApi';
 import TemplateDetailPage from '../pages/TemplateDetailPage/TemplateDetailPage';
@@ -15,7 +15,7 @@ vi.mock('../api/templatesApi', () => ({
   createTemplateVersion: vi.fn(),
 }));
 
-vi.mock('@/features/imports/api/importsApi', () => ({
+vi.mock('@/shared/api/importsApi', () => ({
   createImport: vi.fn(),
   getImport: vi.fn(),
 }));

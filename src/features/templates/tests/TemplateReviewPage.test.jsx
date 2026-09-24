@@ -1,13 +1,13 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createImport, getImport } from '@/features/imports/api/importsApi';
+import { createImport, getImport } from '@/shared/api/importsApi';
 import { ApiError } from '@/shared/api/ApiError';
 import { renderWithRouter } from '@/shared/tests/renderWithRouter';
 import { createTemplate, createTemplateVersion, getTemplate } from '../api/templatesApi';
 import TemplateReviewPage from '../pages/TemplateReviewPage/TemplateReviewPage';
 import maintenanceTemplate from './fixtures/maintenanceTemplate.json';
 
-vi.mock('@/features/imports/api/importsApi', () => ({
+vi.mock('@/shared/api/importsApi', () => ({
   createImport: vi.fn(),
   getImport: vi.fn(),
 }));

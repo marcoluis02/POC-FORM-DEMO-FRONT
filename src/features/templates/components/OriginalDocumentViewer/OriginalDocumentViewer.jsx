@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import DocumentPreview from '@/features/imports/components/DocumentPreview/DocumentPreview';
-import StoredDocument from '@/features/imports/components/StoredDocument/StoredDocument';
-import { DOCUMENT_UPLOAD, isPdf } from '@/features/imports/domain/importRules';
 import Button from '@/shared/components/Button/Button';
 import { useConfirm } from '@/shared/components/ConfirmModal/useConfirm';
+import DocumentPreview from '@/shared/components/DocumentPreview/DocumentPreview';
 import ErrorState from '@/shared/components/ErrorState/ErrorState';
 import FileUploader from '@/shared/components/FileUploader/FileUploader';
+import StoredDocument from '@/shared/components/StoredDocument/StoredDocument';
 import { useToast } from '@/shared/components/Toast/useToast';
+import { DOCUMENT_UPLOAD, isPdf } from '@/shared/domain/documentUpload';
 import './OriginalDocumentViewer.css';
 
 const UPLOAD_HINT = `Opcional. Sube la foto o el PDF del formato en papel (JPG, PNG, WEBP o PDF, máximo ${DOCUMENT_UPLOAD.maxSizeMb} MB y ${DOCUMENT_UPLOAD.maxPdfPages} páginas). Se guarda junto con la plantilla.`;

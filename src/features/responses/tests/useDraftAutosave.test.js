@@ -62,4 +62,50 @@ describe('useDraftAutosave', () => {
     });
     expect(onSave).not.toHaveBeenCalled();
   });
+
+  it('si el payload cambia durante un save, vuelve a guardar al terminar', async () => {
+    let finishFirstSave;
+    const onSave = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishFirstSave = resolve;
+          }),
+      )
+      .mockResolvedValueOnce(undefined);
+
+    const { rerender } = renderHook(
+      ({ payloadKey }) =>
+        useDraftAutosave({
+          enabled: true,
+          delayMs: 1500,
+          payloadKey,
+          canSave: true,
+          onSave,
+        }),
+      { initialProps: { payloadKey: 'a' } },
+    );
+
+    // Arranca el primer guardado
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1500);
+    });
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    // El usuario sigue escribiendo mientras el primero aún no termina
+    rerender({ payloadKey: 'b' });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1500);
+    });
+    // El segundo intento queda en cola; no pisa al que sigue en curso
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    // Al terminar el primero, se guarda el último payload pendiente
+    await act(async () => {
+      finishFirstSave();
+      await Promise.resolve();
+    });
+    expect(onSave).toHaveBeenCalledTimes(2);
+  });
 });
