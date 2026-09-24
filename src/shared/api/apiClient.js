@@ -4,8 +4,8 @@ import { buildUrl } from './buildUrl';
 
 const NO_CONTENT = 204;
 
-function buildSignal(externalSignal) {
-  const timeoutSignal = AbortSignal.timeout(env.apiTimeoutMs);
+function buildSignal(externalSignal, timeoutMs) {
+  const timeoutSignal = AbortSignal.timeout(timeoutMs);
   return externalSignal ? AbortSignal.any([externalSignal, timeoutSignal]) : timeoutSignal;
 }
 
@@ -28,7 +28,15 @@ async function readPayload(response) {
 
 async function request(
   path,
-  { method = 'GET', body, pathParams, query, signal, headers = {} } = {},
+  {
+    method = 'GET',
+    body,
+    pathParams,
+    query,
+    signal,
+    headers = {},
+    timeoutMs = env.apiTimeoutMs,
+  } = {},
 ) {
   const url = buildUrl(env.apiUrl, path, pathParams, query);
   const prepared = buildBody(body);
@@ -39,7 +47,7 @@ async function request(
       method,
       body: prepared.body,
       headers: { Accept: 'application/json', ...prepared.headers, ...headers },
-      signal: buildSignal(signal),
+      signal: buildSignal(signal, timeoutMs),
     });
   } catch (error) {
     // Si quien llamó canceló la petición (ej. React Query), se respeta la cancelación

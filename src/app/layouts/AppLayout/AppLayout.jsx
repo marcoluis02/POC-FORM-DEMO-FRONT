@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router';
+import { Link, NavLink, Outlet } from 'react-router';
 import { APP_NAME } from '@/shared/constants/appInfo';
 import { ROUTES } from '@/app/router/routes';
 import './AppLayout.css';
@@ -11,6 +11,11 @@ export default function AppLayout() {
           <Link to={ROUTES.home} className="app-layout__brand">
             {APP_NAME}
           </Link>
+          <nav aria-label="Principal">
+            <NavLink to={ROUTES.templates} className="app-layout__nav-link">
+              Plantillas
+            </NavLink>
+          </nav>
         </div>
       </header>
       <main className="app-layout__main">

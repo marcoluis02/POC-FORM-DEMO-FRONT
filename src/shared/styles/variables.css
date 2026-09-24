@@ -77,7 +77,8 @@
   --loader-stroke: 4px;
 
   /* Layout */
-  --layout-max-width: 960px;
+  --layout-max-width: 1200px;
+  --viewer-max-height: 75vh;
   --modal-max-width: 480px;
   --toast-max-width: 420px;
   --header-height: 4rem;

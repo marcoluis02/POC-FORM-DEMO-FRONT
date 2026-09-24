@@ -6,10 +6,17 @@
   gap: var(--space-3);
 }
 
+/* El tamaño normal siempre queda centrado en el espacio donde se pone */
+.loader--md {
+  display: flex;
+  width: 100%;
+  padding: var(--space-6) 0;
+}
+
 .loader--page {
   display: flex;
   width: 100%;
-  min-height: 50vh;
+  min-height: 60vh;
 }
 
 .loader__spinner {

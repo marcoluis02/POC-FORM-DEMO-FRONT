@@ -1,0 +1,16 @@
+.template-definition {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.template-definition__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.template-definition__fields {
+  padding: 0;
+  list-style: none;
+}
