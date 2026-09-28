@@ -29,7 +29,6 @@ function versionOptions(latestVersion) {
   });
 }
 
-// La versión se guarda en la URL (?version=1) para que al recargar se vea la misma
 function pickVersion(requested, latestVersion) {
   const version = Number(requested);
   return Number.isInteger(version) && version >= 1 && version <= latestVersion
@@ -37,7 +36,6 @@ function pickVersion(requested, latestVersion) {
     : latestVersion;
 }
 
-// El documento se pide al backend solo cuando el usuario lo quiere ver
 function OriginalDocumentSection({ importId }) {
   const [open, setOpen] = useState(false);
 
@@ -56,7 +54,6 @@ function OriginalDocumentSection({ importId }) {
   );
 }
 
-// Cada versión tiene su propio documento original (o ninguno)
 function VersionContent({ version }) {
   return (
     <>
@@ -71,35 +68,19 @@ function VersionContent({ version }) {
   );
 }
 
-function OldVersionContent({ templateId, version }) {
-  const versionQuery = useTemplateVersion(templateId, version);
-
-  if (versionQuery.isPending) return <Loader label={`Cargando la versión ${version}...`} />;
-  if (versionQuery.isError) {
-    return (
-      <ErrorState
-        title={`No pudimos cargar la versión ${version}`}
-        message={versionQuery.error.message}
-        onRetry={() => versionQuery.refetch()}
-        retrying={versionQuery.isFetching}
-      />
-    );
-  }
-
-  return (
-    <>
-      <p className="template-detail__notice" role="status">
-        Estás viendo la versión {version}, que ya no es la actual. Solo se puede consultar.
-      </p>
-      <VersionContent version={versionQuery.data} />
-    </>
-  );
-}
-
 export default function TemplateDetailPage() {
   const { templateId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const templateQuery = useTemplate(templateId);
+  const template = templateQuery.data;
+  const latestVersion = template?.latest_version ?? null;
+  const selectedVersion = latestVersion
+    ? pickVersion(searchParams.get(VERSION_PARAM), latestVersion)
+    : null;
+  const isLatest = Boolean(latestVersion && selectedVersion === latestVersion);
+  const selectedVersionQuery = useTemplateVersion(templateId, selectedVersion, {
+    enabled: Boolean(selectedVersion && !isLatest),
+  });
 
   if (templateQuery.isPending) return <Loader label="Cargando la plantilla..." fullPage />;
   if (templateQuery.isError) {
@@ -112,10 +93,21 @@ export default function TemplateDetailPage() {
     );
   }
 
-  const template = templateQuery.data;
-  const latestVersion = template.latest_version;
-  const selectedVersion = pickVersion(searchParams.get(VERSION_PARAM), latestVersion);
-  const isLatest = selectedVersion === latestVersion;
+  if (!isLatest && selectedVersionQuery.isPending) {
+    return <Loader label={`Cargando la versión ${selectedVersion}...`} fullPage />;
+  }
+  if (!isLatest && selectedVersionQuery.isError) {
+    return (
+      <ErrorState
+        title={`No pudimos cargar la versión ${selectedVersion}`}
+        message={selectedVersionQuery.error.message}
+        onRetry={() => selectedVersionQuery.refetch()}
+        retrying={selectedVersionQuery.isFetching}
+      />
+    );
+  }
+
+  const versionRecord = isLatest ? template.current_version : selectedVersionQuery.data;
 
   const handleVersionChange = (event) => {
     const version = Number(event.target.value);
@@ -138,7 +130,7 @@ export default function TemplateDetailPage() {
             <Badge tone={template.status === TEMPLATE_STATUS.ACTIVE ? 'success' : 'neutral'}>
               {TEMPLATE_STATUS_LABELS[template.status] ?? template.status}
             </Badge>
-            <Badge tone="info">Versión {latestVersion}</Badge>
+            <Badge tone="info">Versión {selectedVersion}</Badge>
           </div>
         </div>
         <p className="text-secondary text-small">
@@ -163,13 +155,20 @@ export default function TemplateDetailPage() {
         </div>
       </header>
 
-      <ResponsesSection templateId={template.id} latestVersion={latestVersion} />
-
-      {isLatest ? (
-        <VersionContent version={template.current_version} />
-      ) : (
-        <OldVersionContent templateId={template.id} version={selectedVersion} />
+      {!isLatest && (
+        <p className="template-detail__notice" role="status">
+          Estás viendo la versión {selectedVersion}. Si empiezas un formulario desde aquí, quedará
+          ligado a esta versión exacta aunque después exista una versión más nueva.
+        </p>
       )}
+
+      <ResponsesSection
+        templateId={template.id}
+        templateVersionId={versionRecord.id}
+        version={versionRecord.version}
+      />
+
+      <VersionContent version={versionRecord} />
     </div>
   );
 }

@@ -62,6 +62,10 @@ async function fillNewTemplate(user) {
 }
 
 describe('TemplateReviewPage', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
   it('no manda nada al backend si faltan datos y dice qué corregir', async () => {
     const user = userEvent.setup();
     renderReview('/templates/new');
@@ -220,7 +224,11 @@ describe('TemplateReviewPage', () => {
 
     it('sube el archivo primero y guarda la plantilla ligada a él', async () => {
       const user = userEvent.setup();
-      createImport.mockResolvedValue({ id: IMPORT_ID, original_url: 'https://s3.test/x' });
+      createImport.mockResolvedValue({
+        id: IMPORT_ID,
+        status: 'requires_review',
+        original_url: 'https://s3.test/x',
+      });
       createTemplate.mockResolvedValue(savedTemplate(1, maintenanceTemplate, IMPORT_ID));
       renderReview('/templates/new');
 
@@ -293,6 +301,72 @@ describe('TemplateReviewPage', () => {
       ).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Guardar nueva versión' })).toBeEnabled();
     });
+
+    it('al reemplazar el original espera a que el import esté listo y guarda con un solo click', async () => {
+      const user = userEvent.setup();
+      const NEW_IMPORT_ID = '83d5928d-5371-4ed3-a566-e996bcd917d9';
+      let resolveReadyImport;
+      const readyImport = new Promise((resolve) => {
+        resolveReadyImport = resolve;
+      });
+
+      getTemplate.mockResolvedValue(savedTemplate(1, maintenanceTemplate, IMPORT_ID));
+      getImport.mockImplementation((importId) => {
+        if (importId === IMPORT_ID) {
+          return Promise.resolve({
+            id: IMPORT_ID,
+            status: 'requires_review',
+            original_filename: 'viejo.png',
+            mime_type: 'image/png',
+            original_url: 'https://s3.test/viejo.png',
+          });
+        }
+        if (importId === NEW_IMPORT_ID) return readyImport;
+        throw new Error(`Import inesperado: ${importId}`);
+      });
+      createImport.mockResolvedValue({
+        id: NEW_IMPORT_ID,
+        status: 'processing',
+        original_filename: 'revision.png',
+        mime_type: 'image/png',
+        original_url: 'https://s3.test/revision.png',
+      });
+      createTemplateVersion.mockResolvedValue(
+        savedTemplate(2, maintenanceTemplate, NEW_IMPORT_ID),
+      );
+
+      renderReview(`/templates/${TEMPLATE_ID}/edit`);
+      expect(
+        await screen.findByRole('img', { name: 'Documento original: viejo.png' }),
+      ).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Reemplazar archivo' }));
+      await user.upload(screen.getByLabelText('Elegir foto o PDF'), photo);
+      await user.click(screen.getByRole('button', { name: 'Guardar nueva versión' }));
+      await user.click(await screen.findByRole('button', { name: 'Sí, guardar versión' }));
+
+      expect(
+        await screen.findByText('Documento subido. Terminando de procesarlo…'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/No necesitas presionar Guardar otra vez/),
+      ).toBeInTheDocument();
+      expect(createTemplateVersion).not.toHaveBeenCalled();
+
+      resolveReadyImport({
+        id: NEW_IMPORT_ID,
+        status: 'requires_review',
+        original_filename: 'revision.png',
+        mime_type: 'image/png',
+        original_url: 'https://s3.test/revision.png',
+        draft_json: maintenanceTemplate,
+      });
+
+      expect(await screen.findByText('Detalle de la plantilla')).toBeInTheDocument();
+      expect(createImport).toHaveBeenCalledTimes(1);
+      expect(createTemplateVersion).toHaveBeenCalledTimes(1);
+      expect(createTemplateVersion.mock.calls[0][2].sourceImportId).toBe(NEW_IMPORT_ID);
+    });
   });
 
   it('muestra que la plantilla no existe si el backend responde 404', async () => {
@@ -300,5 +374,111 @@ describe('TemplateReviewPage', () => {
     renderReview(`/templates/${TEMPLATE_ID}/edit`);
 
     expect(await screen.findByText('No encontramos esta plantilla')).toBeInTheDocument();
+  });
+});
+
+describe('TemplateReviewPage — borrador generado por IA', () => {
+  const IMPORT_ID = '880de87b-9acd-4acf-a14e-27327668e66e';
+
+  function aiImport(overrides = {}) {
+    return {
+      id: IMPORT_ID,
+      status: 'requires_review',
+      original_filename: 'checklist.png',
+      mime_type: 'image/png',
+      original_url: 'https://s3.test/checklist.png',
+      warnings: [
+        {
+          code: 'ambiguous_label',
+          message: 'Confirma el texto de la segunda pregunta.',
+          field_id: 'f_002',
+        },
+      ],
+      draft_json: maintenanceTemplate,
+      processing_ms: 2400,
+      estimated_cost: 0.001,
+      detected_fields_count: 2,
+      corrections_count: 0,
+      error_code: null,
+      error_message: null,
+      ...overrides,
+    };
+  }
+
+  it('carga draft_json en el editor y muestra original + warnings', async () => {
+    getImport.mockResolvedValue(aiImport());
+    renderReview(`/templates/new?importId=${IMPORT_ID}`);
+
+    expect(await screen.findByRole('heading', { name: 'Revisa la plantilla generada' })).toBeInTheDocument();
+    expect(screen.getByDisplayValue(maintenanceTemplate.title)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(maintenanceTemplate.sections[0].title)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(maintenanceTemplate.sections[0].fields[0].label)).toBeInTheDocument();
+    expect(screen.getByText('Confirma el texto de la segunda pregunta.')).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', { name: 'Documento original: checklist.png' }),
+    ).toHaveAttribute('src', 'https://s3.test/checklist.png');
+    expect(screen.queryByRole('button', { name: 'Reemplazar archivo' })).not.toBeInTheDocument();
+  });
+
+  it('confirma la propuesta usando source_import_id sin volver a subir el archivo', async () => {
+    const user = userEvent.setup();
+    getImport.mockResolvedValue(aiImport());
+    createTemplate.mockResolvedValue(savedTemplate(1, maintenanceTemplate, IMPORT_ID));
+    renderReview(`/templates/new?importId=${IMPORT_ID}`);
+
+    await screen.findByDisplayValue(maintenanceTemplate.title);
+    await user.click(screen.getByRole('button', { name: 'Guardar plantilla' }));
+    const dialog = await screen.findByRole('dialog', { name: '¿Guardar la plantilla?' });
+    expect(within(dialog).getByText(/ligada al documento original/)).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Sí, guardar' }));
+
+    expect(await screen.findByText('Detalle de la plantilla')).toBeInTheDocument();
+    expect(createImport).not.toHaveBeenCalled();
+    expect(createTemplate).toHaveBeenCalledTimes(1);
+    expect(createTemplate.mock.calls[0][1].sourceImportId).toBe(IMPORT_ID);
+    expect(createTemplate.mock.calls[0][0].title).toBe(maintenanceTemplate.title);
+  });
+
+  it('si el backend dice source_import_not_ready conserva el editor y permite volver al procesamiento', async () => {
+    const user = userEvent.setup();
+    getImport.mockResolvedValue(aiImport());
+    createTemplate.mockRejectedValue(
+      new ApiError({
+        status: 422,
+        code: 'source_import_not_ready',
+        message: 'La importación todavía no está lista para confirmarse.',
+      }),
+    );
+    renderReview(`/templates/new?importId=${IMPORT_ID}`);
+
+    const title = await screen.findByLabelText(/Nombre del formulario/);
+    await user.clear(title);
+    await user.type(title, 'Checklist corregido');
+    await user.click(screen.getByRole('button', { name: 'Guardar plantilla' }));
+    await user.click(await screen.findByRole('button', { name: 'Sí, guardar' }));
+
+    expect(await screen.findByText('El documento todavía no está listo para confirmarse.')).toBeInTheDocument();
+    expect(screen.getByText('La importación todavía no está lista para confirmarse.')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Checklist corregido')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Revisar procesamiento' })).toHaveAttribute(
+      'href',
+      `/imports/${IMPORT_ID}`,
+    );
+  });
+
+  it('no intenta renderizar un draft_json que viola FormDefinition', async () => {
+    getImport.mockResolvedValue(
+      aiImport({
+        draft_json: {
+          schema_version: 1,
+          title: 'Incompleto',
+          sections: [],
+        },
+      }),
+    );
+    renderReview(`/templates/new?importId=${IMPORT_ID}`);
+
+    expect(await screen.findByText('La propuesta recibida no es válida')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Guardar plantilla' })).not.toBeInTheDocument();
   });
 });

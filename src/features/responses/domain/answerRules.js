@@ -1,9 +1,9 @@
 // Reglas para contestar un formulario. Son una ayuda para el usuario: el backend
 // (app/services/answer_validator.py) vuelve a revisar todo y es quien decide.
-import { env } from '@/app/config/env';
-import { FIELD_TYPES } from '@/features/templates/domain/fieldTypes';
-import { TEMPLATE_LIMITS } from '@/features/templates/domain/templateSchema';
-import { byPosition } from '@/shared/utils/byPosition';
+import { env } from "@/app/config/env";
+import { FIELD_TYPES } from "@/features/templates/domain/fieldTypes";
+import { TEMPLATE_LIMITS } from "@/features/templates/domain/templateSchema";
+import { byPosition } from "@/shared/utils/byPosition";
 
 // Mismos límites que app/domain/answer_rules.py y el nombre del llenado (TITLE_MAX_LENGTH del back)
 export const ANSWER_LIMITS = Object.freeze({
@@ -14,31 +14,31 @@ export const ANSWER_LIMITS = Object.freeze({
 });
 
 export const YES_NO_NA_OPTIONS = Object.freeze([
-  { value: 'yes', label: 'Sí' },
-  { value: 'no', label: 'No' },
-  { value: 'na', label: 'No aplica' },
+  { value: "yes", label: "Sí" },
+  { value: "no", label: "No" },
+  { value: "na", label: "No aplica" },
 ]);
 
 // Filtro del selector de fotos (solo UI). El backend revisa el contenido real.
 export const PHOTO_UPLOAD = Object.freeze({
-  accept: 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp',
+  accept: "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp",
   maxSizeMb: env.maxUploadMb,
   maxPerField: env.maxPhotosPerField,
 });
 
 export const ANSWER_MESSAGES = Object.freeze({
-  required: 'Esta pregunta es obligatoria.',
-  checkboxRequired: 'Debes marcar esta casilla.',
-  photoRequired: 'Agrega al menos una foto.',
-  invalidNumber: 'Escribe solo números.',
-  numberTooBig: 'El número es demasiado grande.',
-  invalidSelect: 'Elige una de las opciones de la lista.',
+  required: "Esta pregunta es obligatoria.",
+  checkboxRequired: "Debes marcar esta casilla.",
+  photoRequired: "Agrega al menos una foto.",
+  invalidNumber: "Escribe solo números.",
+  numberTooBig: "El número es demasiado grande.",
+  invalidSelect: "Elige una de las opciones de la lista.",
   textTooLong: (max) => `La respuesta no puede pasar de ${max} caracteres.`,
-  nameRequired: 'Escribe un nombre para este formulario.',
+  nameRequired: "Escribe un nombre para este formulario.",
 });
 
 export function cleanResponseName(name) {
-  return typeof name === 'string' ? name.trim() : '';
+  return typeof name === "string" ? name.trim() : "";
 }
 
 export function validateResponseName(name) {
@@ -56,7 +56,10 @@ const TEXT_LIMITS = {
 };
 
 // Foto y firma no llevan valor escrito: la foto se sube aparte y la firma es "próximamente"
-const NO_VALUE_TYPES = new Set([FIELD_TYPES.PHOTO, FIELD_TYPES.SIGNATURE_PLACEHOLDER]);
+const NO_VALUE_TYPES = new Set([
+  FIELD_TYPES.PHOTO,
+  FIELD_TYPES.SIGNATURE_PLACEHOLDER,
+]);
 
 export function acceptsPhotos(field) {
   return field.type === FIELD_TYPES.PHOTO || field.allow_evidence;
@@ -79,7 +82,7 @@ export function answersFromValues(values) {
   return Object.fromEntries(
     Object.entries(values).map(([fieldId, value]) => [
       fieldId,
-      typeof value === 'number' ? String(value) : value,
+      typeof value === "number" ? String(value) : value,
     ]),
   );
 }
@@ -87,9 +90,9 @@ export function answersFromValues(values) {
 function toValue(field, answer) {
   if (answer === undefined || answer === null) return null;
   if (field.type === FIELD_TYPES.CHECKBOX) return answer === true;
-  if (typeof answer !== 'string') return answer;
+  if (typeof answer !== "string") return answer;
   const text = answer.trim();
-  if (text === '') return null;
+  if (text === "") return null;
   return field.type === FIELD_TYPES.NUMBER ? Number(text) : text;
 }
 
@@ -107,21 +110,25 @@ export function answersToValues(definition, answers) {
 function formatProblem(field, value) {
   if (field.type === FIELD_TYPES.NUMBER && value !== undefined) {
     if (!Number.isFinite(value)) return ANSWER_MESSAGES.invalidNumber;
-    if (Math.abs(value) > ANSWER_LIMITS.numberMaxAbs) return ANSWER_MESSAGES.numberTooBig;
+    if (Math.abs(value) > ANSWER_LIMITS.numberMaxAbs)
+      return ANSWER_MESSAGES.numberTooBig;
   }
   if (field.type === FIELD_TYPES.SELECT && value !== undefined) {
-    const allowed = new Set((field.options ?? []).map((option) => option.value));
+    const allowed = new Set(
+      (field.options ?? []).map((option) => option.value),
+    );
     if (!allowed.has(value)) return ANSWER_MESSAGES.invalidSelect;
   }
   const maxLength = TEXT_LIMITS[field.type];
-  if (maxLength && typeof value === 'string' && value.length > maxLength) {
+  if (maxLength && typeof value === "string" && value.length > maxLength) {
     return ANSWER_MESSAGES.textTooLong(maxLength);
   }
   return null;
 }
 
 function requiredProblem(field, value, photoCount) {
-  if (!field.required || field.type === FIELD_TYPES.SIGNATURE_PLACEHOLDER) return null;
+  if (!field.required || field.type === FIELD_TYPES.SIGNATURE_PLACEHOLDER)
+    return null;
   if (field.type === FIELD_TYPES.PHOTO)
     return photoCount > 0 ? null : ANSWER_MESSAGES.photoRequired;
   if (field.type === FIELD_TYPES.CHECKBOX)
@@ -138,7 +145,12 @@ function photoCountByField(attachments) {
 }
 
 // Regresa { fieldId: mensaje }. Con requireAll (al enviar) también revisa las obligatorias.
-export function validateAnswers(definition, answers, attachments, { requireAll = false } = {}) {
+export function validateAnswers(
+  definition,
+  answers,
+  attachments,
+  { requireAll = false } = {},
+) {
   const values = answersToValues(definition, answers);
   const photos = photoCountByField(attachments);
   const errors = {};
@@ -146,16 +158,28 @@ export function validateAnswers(definition, answers, attachments, { requireAll =
     const value = values[field.id];
     const problem =
       formatProblem(field, value) ??
-      (requireAll ? requiredProblem(field, value, photos[field.id] ?? 0) : null);
+      (requireAll
+        ? requiredProblem(field, value, photos[field.id] ?? 0)
+        : null);
     if (problem) errors[field.id] = problem;
   }
   return errors;
 }
 
+function normalizeResponseErrorField(fieldId) {
+  if (!fieldId || typeof fieldId !== "string") return null;
+  if (fieldId === "name") return "name";
+  // RequestValidationError puede regresar rutas como values.f_001.
+  const fieldMatch = /(?:^|\.)(f_\d{3,6})$/.exec(fieldId);
+  return fieldMatch?.[1] ?? fieldId;
+}
+
 // Errores 422 del backend -> { fieldId: mensaje }
 export function errorsFromApiDetails(details) {
   return Object.fromEntries(
-    details.filter((item) => item.field_id).map((item) => [item.field_id, item.message]),
+    details
+      .map((item) => [normalizeResponseErrorField(item.field_id), item.message])
+      .filter(([fieldId]) => fieldId),
   );
 }
 

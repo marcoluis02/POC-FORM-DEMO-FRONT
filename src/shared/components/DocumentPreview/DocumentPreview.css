@@ -22,3 +22,13 @@
   padding: var(--space-5);
   text-align: center;
 }
+
+@media (max-width: 640px) {
+  .document-preview {
+    max-height: 60vh;
+  }
+
+  .document-preview__pdf {
+    height: 60vh;
+  }
+}

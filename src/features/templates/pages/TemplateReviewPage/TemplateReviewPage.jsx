@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useCallback, useMemo, useReducer, useRef, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { ROUTES, paths } from '@/app/router/routes';
 import Button from '@/shared/components/Button/Button';
 import ButtonLink from '@/shared/components/ButtonLink/ButtonLink';
 import { useConfirm } from '@/shared/components/ConfirmModal/useConfirm';
+import ErrorState from '@/shared/components/ErrorState/ErrorState';
 import ErrorSummary from '@/shared/components/ErrorSummary/ErrorSummary';
 import Loader from '@/shared/components/Loader/Loader';
+import { importWarningMessage } from '@/shared/domain/importContract';
+import { IMPORT_STATUS } from '@/shared/domain/importStatus';
+import { useImport } from '@/shared/hooks/useImport';
 import { useToast } from '@/shared/components/Toast/useToast';
 import { useLocalFilePreview } from '@/shared/hooks/useLocalFilePreview';
 import { useUnsavedChangesGuard } from '@/shared/hooks/useUnsavedChangesGuard';
@@ -19,19 +23,23 @@ import {
   errorsFromApiDetails,
   groupErrorsByPath,
 } from '../../domain/templateErrors';
-import { validateFormDefinitionInput } from '../../domain/templateSchema';
-import { useSaveTemplate } from '../../hooks/useSaveTemplate';
+import { validateFormDefinition, validateFormDefinitionInput } from '../../domain/templateSchema';
+import { TEMPLATE_SAVE_PHASE, useSaveTemplate } from '../../hooks/useSaveTemplate';
 import { useTemplate } from '../../hooks/useTemplate';
 import './TemplateReviewPage.css';
 
-function initialDraftFor(template) {
-  return template ? draftFromDefinition(template.current_version.definition) : createEmptyDraft();
+function initialDraftFor({ template, sourceImport }) {
+  if (template) return draftFromDefinition(template.current_version.definition);
+  if (sourceImport) return draftFromDefinition(sourceImport.draft_json);
+  return createEmptyDraft();
 }
 
 const FILE_NOTE = ' También se guardará el documento original que elegiste.';
+const IMPORT_NOTE = ' La plantilla quedará ligada al documento original que generó esta propuesta.';
+const SOURCE_IMPORT_NOT_READY = 'source_import_not_ready';
 
-function saveConfirmation(template, hasFile) {
-  const fileNote = hasFile ? FILE_NOTE : '';
+function saveConfirmation(template, { hasFile, hasSourceImport }) {
+  const fileNote = hasFile ? FILE_NOTE : hasSourceImport ? IMPORT_NOTE : '';
   if (!template) {
     return {
       title: '¿Guardar la plantilla?',
@@ -46,16 +54,38 @@ function saveConfirmation(template, hasFile) {
   };
 }
 
-function TemplateReviewWorkspace({ template }) {
+function ImportWarnings({ warnings }) {
+  if (!warnings?.length) return null;
+  return (
+    <section className="template-review__warnings" aria-labelledby="ai-warnings-title">
+      <h2 id="ai-warnings-title">Revisa estos puntos detectados por la IA</h2>
+      <ul>
+        {warnings.map((warning, index) => (
+          <li key={`${typeof warning === 'string' ? warning : warning.code || 'warning'}-${index}`}>
+            {importWarningMessage(warning)}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function TemplateReviewWorkspace({ template, sourceImport = null }) {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const toast = useToast();
   const summaryRef = useRef(null);
   const isNew = !template;
+  const fromAi = Boolean(sourceImport);
 
-  const [draft, dispatch] = useReducer(templateEditorReducer, template, initialDraftFor);
+  const [draft, dispatch] = useReducer(
+    templateEditorReducer,
+    { template, sourceImport },
+    initialDraftFor,
+  );
   const [initialPayload] = useState(() => JSON.stringify(draftToPayload(draft)));
   const [errors, setErrors] = useState([]);
+  const [sourceImportProblem, setSourceImportProblem] = useState('');
   const saveTemplate = useSaveTemplate(template?.id);
   const original = useLocalFilePreview();
 
@@ -67,18 +97,25 @@ function TemplateReviewWorkspace({ template }) {
   const errorsByPath = useMemo(() => groupErrorsByPath(errors), [errors]);
   const summaryMessages = useMemo(() => [...new Set(errors.map(describeError))], [errors]);
 
-  // Si ya había errores al guardar, al ir corrigiendo se quitan los que ya están bien
-  useEffect(() => {
-    setErrors((current) => {
-      if (current.length === 0) return current;
-      const result = validateFormDefinitionInput(draftToPayload(draft));
-      return result.ok ? [] : result.errors;
-    });
-  }, [draft]);
+  // Si ya hubo un intento de guardado con errores, cada edición vuelve a validar
+  // el borrador resultante para retirar solo los errores que el usuario ya corrigió.
+  // Se hace desde el evento (no desde un effect) para evitar renders en cascada.
+  const dispatchDraft = useCallback(
+    (action) => {
+      const nextDraft = templateEditorReducer(draft, action);
+      dispatch(action);
+      setSourceImportProblem('');
+      setErrors((current) => {
+        if (current.length === 0) return current;
+        const result = validateFormDefinitionInput(draftToPayload(nextDraft));
+        return result.ok ? [] : result.errors;
+      });
+    },
+    [draft],
+  );
 
   const showErrors = (nextErrors) => {
     setErrors(nextErrors);
-    // Espera a que se pinte el resumen para llevar el foco ahí
     requestAnimationFrame(() => summaryRef.current?.focus());
   };
 
@@ -90,14 +127,34 @@ function TemplateReviewWorkspace({ template }) {
       return;
     }
     setErrors([]);
+    setSourceImportProblem('');
 
-    if (!(await confirm(saveConfirmation(template, Boolean(original.file))))) return;
+    if (
+      !(await confirm(
+        saveConfirmation(template, {
+          hasFile: Boolean(original.file),
+          hasSourceImport: Boolean(sourceImport?.id),
+        }),
+      ))
+    ) {
+      return;
+    }
 
     let saved;
     try {
-      saved = await saveTemplate.save({ definition: result.definition, file: original.file });
+      saved = await saveTemplate.save({
+        definition: result.definition,
+        file: original.file,
+        sourceImportId: sourceImport?.id,
+      });
     } catch (error) {
-      if (error.isValidationError) showErrors(errorsFromApiDetails(error.details));
+      if (error.code === SOURCE_IMPORT_NOT_READY && sourceImport?.id) {
+        setSourceImportProblem(error.message);
+        return;
+      }
+      if (error.isValidationError) {
+        showErrors(errorsFromApiDetails(error.details));
+      }
       toast.error(error.message);
       return;
     }
@@ -106,16 +163,47 @@ function TemplateReviewWorkspace({ template }) {
     navigate(paths.templateDetail(saved.id));
   };
 
+  const storedImportId = sourceImport?.id ?? template?.current_version.source_import_id;
+
   return (
     <div className="template-review">
       <header className="stack">
-        <h1>{isNew ? 'Nueva plantilla' : `Editar: ${template.name}`}</h1>
+        <p className="template-review__eyebrow">{fromAi ? 'Revisión de propuesta' : 'Plantilla'}</p>
+        <h1>
+          {fromAi ? 'Revisa la plantilla generada' : isNew ? 'Nueva plantilla' : `Editar: ${template.name}`}
+        </h1>
         <p className="text-secondary">
-          {isNew
-            ? 'Escribe el nombre del formulario, agrega las secciones y las preguntas. Al terminar, presiona "Guardar plantilla".'
-            : `Estás editando la versión ${template.latest_version}. Al guardar se crea la versión ${template.latest_version + 1}.`}
+          {fromAi
+            ? 'Compara el documento original con la propuesta de IA. Corrige, agrega, elimina o reordena lo necesario y confirma cuando esté lista.'
+            : isNew
+              ? 'Escribe el nombre del formulario, agrega las secciones y las preguntas. Al terminar, presiona "Guardar plantilla".'
+              : `Estás editando la versión ${template.latest_version}. Al guardar se crea la versión ${template.latest_version + 1}.`}
         </p>
       </header>
+
+      <ImportWarnings warnings={sourceImport?.warnings} />
+
+      {saveTemplate.phase === TEMPLATE_SAVE_PHASE.PROCESSING_DOCUMENT && (
+        <section className="template-review__save-status" role="status">
+          <strong>Documento subido. Terminando de procesarlo…</strong>
+          <p>
+            La plantilla se guardará automáticamente en cuanto el documento esté listo. No
+            necesitas presionar Guardar otra vez.
+          </p>
+        </section>
+      )}
+
+      {sourceImportProblem && (
+        <section className="template-review__import-problem" role="alert">
+          <div>
+            <strong>El documento todavía no está listo para confirmarse.</strong>
+            <p>{sourceImportProblem}</p>
+          </div>
+          <ButtonLink variant="secondary" to={paths.importDetail(sourceImport.id)}>
+            Revisar procesamiento
+          </ButtonLink>
+        </section>
+      )}
 
       <ErrorSummary
         ref={summaryRef}
@@ -128,16 +216,17 @@ function TemplateReviewWorkspace({ template }) {
           <OriginalDocumentViewer
             file={original.file}
             fileUrl={original.url}
-            storedImportId={template?.current_version.source_import_id}
+            storedImportId={storedImportId}
             onSelect={original.select}
             onClear={original.clear}
             disabled={saveTemplate.isPending}
+            allowReplace={!fromAi}
           />
         </div>
         <div className="template-review__editor">
           <TemplateEditor
             draft={draft}
-            dispatch={dispatch}
+            dispatch={dispatchDraft}
             errors={errorsByPath}
             disabled={saveTemplate.isPending}
           />
@@ -172,23 +261,73 @@ function TemplateReviewWorkspace({ template }) {
   );
 }
 
-// Sin templateId crea una plantilla nueva; con templateId edita la última versión
+// Sin templateId crea una plantilla nueva; ?importId carga el borrador generado por IA.
+// Con templateId edita la última versión existente.
 export default function TemplateReviewPage() {
   const { templateId } = useParams();
+  const [searchParams] = useSearchParams();
+  const importId = !templateId ? searchParams.get('importId') : null;
   const templateQuery = useTemplate(templateId);
+  const importQuery = useImport(importId, { poll: true });
 
-  if (!templateId) return <TemplateReviewWorkspace key="new" template={null} />;
-  if (templateQuery.isPending) return <Loader label="Cargando la plantilla..." fullPage />;
-  if (templateQuery.isError) {
+  if (templateId) {
+    if (templateQuery.isPending) return <Loader label="Cargando la plantilla..." fullPage />;
+    if (templateQuery.isError) {
+      return (
+        <TemplateLoadError
+          error={templateQuery.error}
+          onRetry={() => templateQuery.refetch()}
+          retrying={templateQuery.isFetching}
+        />
+      );
+    }
+
+    const template = templateQuery.data;
+    return <TemplateReviewWorkspace key={template.current_version.id} template={template} />;
+  }
+
+  if (!importId) return <TemplateReviewWorkspace key="new" template={null} />;
+  if (importQuery.isPending) return <Loader label="Cargando la propuesta de IA..." fullPage />;
+  if (importQuery.isError) {
     return (
-      <TemplateLoadError
-        error={templateQuery.error}
-        onRetry={() => templateQuery.refetch()}
-        retrying={templateQuery.isFetching}
+      <ErrorState
+        title="No pudimos cargar la propuesta"
+        message={importQuery.error.message}
+        onRetry={() => importQuery.refetch()}
+        retrying={importQuery.isFetching}
       />
     );
   }
 
-  const template = templateQuery.data;
-  return <TemplateReviewWorkspace key={template.current_version.id} template={template} />;
+  const imported = importQuery.data;
+  if (imported.status === IMPORT_STATUS.FAILED) {
+    return (
+      <ErrorState
+        title="No pudimos generar una propuesta"
+        message={imported.error_message || 'Prueba con otro documento o crea la plantilla manualmente.'}
+      />
+    );
+  }
+  if (imported.status !== IMPORT_STATUS.REQUIRES_REVIEW) {
+    return <Loader label="El documento todavía se está procesando..." fullPage />;
+  }
+
+  const draftResult = validateFormDefinition(imported.draft_json);
+  if (!draftResult.ok) {
+    return (
+      <ErrorState
+        title="La propuesta recibida no es válida"
+        message="El backend devolvió un borrador que no cumple el contrato de formulario. Vuelve a procesar el documento."
+      />
+    );
+  }
+
+  const sourceImport = { ...imported, draft_json: draftResult.definition };
+  return (
+    <TemplateReviewWorkspace
+      key={`import-${sourceImport.id}`}
+      template={null}
+      sourceImport={sourceImport}
+    />
+  );
 }

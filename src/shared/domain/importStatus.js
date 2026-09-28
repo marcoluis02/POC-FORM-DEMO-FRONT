@@ -11,3 +11,11 @@ export const IMPORT_STATUS_LABELS = Object.freeze({
   [IMPORT_STATUS.REQUIRES_REVIEW]: 'Listo para revisar',
   [IMPORT_STATUS.FAILED]: 'Falló',
 });
+
+export function shouldPollImport(status) {
+  return status === IMPORT_STATUS.RECEIVED || status === IMPORT_STATUS.PROCESSING;
+}
+
+export function canReviewImport(status) {
+  return status === IMPORT_STATUS.REQUIRES_REVIEW;
+}

@@ -69,11 +69,11 @@ function ResponsesList({ templateId }) {
   );
 }
 
-// Formularios llenados con esta plantilla y el botón para empezar uno nuevo
-export default function ResponsesSection({ templateId, latestVersion }) {
+// Crea el llenado sobre la versión exacta seleccionada en la pantalla.
+export default function ResponsesSection({ templateId, templateVersionId, version }) {
   const navigate = useNavigate();
   const toast = useToast();
-  const createResponse = useCreateResponse(templateId);
+  const createResponse = useCreateResponse(templateVersionId);
   const [askingName, setAskingName] = useState(false);
 
   const handleStart = async (name) => {
@@ -85,17 +85,25 @@ export default function ResponsesSection({ templateId, latestVersion }) {
       return;
     }
     setAskingName(false);
-    toast.success('Formulario creado. Ya puedes contestarlo.');
+    toast.success(`Formulario creado con la versión ${created.version}. Ya puedes contestarlo.`);
     navigate(paths.responseDetail(created.id));
   };
 
   return (
     <section className="card responses-section" aria-labelledby="responses-section-title">
       <div className="responses-section__header">
-        <h2 id="responses-section-title" className="responses-section__title">
-          Formularios llenados
-        </h2>
-        <Button onClick={() => setAskingName(true)} disabled={createResponse.isPending}>
+        <div>
+          <h2 id="responses-section-title" className="responses-section__title">
+            Formularios llenados
+          </h2>
+          <p className="text-secondary text-small">
+            Los formularios nuevos quedan ligados exactamente a la versión {version}.
+          </p>
+        </div>
+        <Button
+          onClick={() => setAskingName(true)}
+          disabled={createResponse.isPending || !templateVersionId}
+        >
           + Llenar formulario
         </Button>
       </div>
@@ -103,7 +111,7 @@ export default function ResponsesSection({ templateId, latestVersion }) {
       <StartResponseModal
         key={askingName ? 'open' : 'closed'}
         open={askingName}
-        latestVersion={latestVersion}
+        latestVersion={version}
         loading={createResponse.isPending}
         onCancel={() => setAskingName(false)}
         onConfirm={handleStart}

@@ -1,0 +1,98 @@
+.response-report-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.response-report-field:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.response-report-field__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.response-report-field__heading h3 {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+
+.response-report-field__answer,
+.response-report-field__evidence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.response-report-field__answer p,
+.response-report-field__evidence p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.response-report-field__answer-label {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.response-report-field__empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.response-report-field__photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.response-report-field__photo {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.response-report-field__photo-link {
+  display: block;
+  overflow: hidden;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.response-report-field__photo-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.response-report-field__photo-name {
+  overflow: hidden;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.response-report-field__photo--broken {
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 9rem;
+  padding: var(--space-3);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}

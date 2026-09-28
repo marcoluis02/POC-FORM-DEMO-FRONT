@@ -61,3 +61,18 @@
   color: var(--color-warning);
   font-weight: var(--font-weight-medium);
 }
+
+@media (max-width: 640px) {
+  .template-detail__title-row,
+  .template-detail__toolbar,
+  .template-detail__original-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .template-detail__version,
+  .template-detail__toolbar .button,
+  .template-detail__original-header .button {
+    width: 100%;
+  }
+}

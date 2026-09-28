@@ -4,8 +4,10 @@ import { importKeys } from '@/shared/api/importKeys';
 import { useIdempotencyKey } from '@/shared/hooks/useIdempotencyKey';
 import { fileIdentity } from '@/shared/utils/fileIdentity';
 
-// La clave no se libera al terminar: si después falla guardar la plantilla y se reintenta
-// con el mismo archivo, el backend regresa el mismo documento en vez de subirlo otra vez.
+// La misma petición conserva su key durante reintentos para evitar duplicados si la red se corta.
+// Al cambiar de archivo cambia la identidad; al salir de la pantalla el hook se desmonta y una
+// digitalización nueva obtiene otra key. Esto también permite reintentar el guardado manual sin
+// volver a crear el import si el archivo ya alcanzó el backend.
 export function useCreateImport() {
   const queryClient = useQueryClient();
   const { keyFor } = useIdempotencyKey();

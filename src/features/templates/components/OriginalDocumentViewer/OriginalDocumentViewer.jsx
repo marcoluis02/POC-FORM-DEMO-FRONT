@@ -9,7 +9,7 @@ import { useToast } from '@/shared/components/Toast/useToast';
 import { DOCUMENT_UPLOAD, isPdf } from '@/shared/domain/documentUpload';
 import './OriginalDocumentViewer.css';
 
-const UPLOAD_HINT = `Opcional. Sube la foto o el PDF del formato en papel (JPG, PNG, WEBP o PDF, máximo ${DOCUMENT_UPLOAD.maxSizeMb} MB y ${DOCUMENT_UPLOAD.maxPdfPages} páginas). Se guarda junto con la plantilla.`;
+const UPLOAD_HINT = `Opcional. Sube la foto o el PDF del formato en papel (JPG, PNG o PDF, máximo ${DOCUMENT_UPLOAD.maxSizeMb} MB y ${DOCUMENT_UPLOAD.maxPdfPages} páginas). Se guarda junto con la plantilla.`;
 
 // Foto o PDF del formato en papel junto al editor.
 // file/fileUrl: archivo elegido que aún no se sube. storedImportId: documento ya guardado de la plantilla.
@@ -20,13 +20,14 @@ export default function OriginalDocumentViewer({
   onSelect,
   onClear,
   disabled = false,
+  allowReplace = true,
 }) {
   const confirm = useConfirm();
   const toast = useToast();
   const [replacing, setReplacing] = useState(false);
   const [failedUrl, setFailedUrl] = useState(null);
 
-  const showUploader = !file && (!storedImportId || replacing);
+  const showUploader = !file && (!storedImportId || (allowReplace && replacing));
 
   const handleSelect = (selected) => {
     setReplacing(false);
@@ -58,7 +59,7 @@ export default function OriginalDocumentViewer({
             Quitar archivo
           </Button>
         )}
-        {!file && storedImportId && (
+        {!file && storedImportId && allowReplace && (
           <Button
             variant="secondary"
             size="sm"

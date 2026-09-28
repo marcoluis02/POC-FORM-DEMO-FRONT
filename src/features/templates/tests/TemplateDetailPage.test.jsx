@@ -233,8 +233,41 @@ describe('TemplateDetailPage', () => {
       expect(await screen.findByText('Pantalla para contestar')).toBeInTheDocument();
       expect(router.state.location.pathname).toBe('/responses/r-9');
       expect(createResponse).toHaveBeenCalledWith(
-        TEMPLATE_ID,
+        'version-2',
         'Visita Centro',
+        expect.objectContaining({ idempotencyKey: expect.any(String) }),
+      );
+    });
+
+
+    it('si el usuario ve una versión anterior crea el formulario con esa versión exacta', async () => {
+      const user = userEvent.setup();
+      getTemplate.mockResolvedValue(templateV2);
+      getTemplateVersion.mockResolvedValue({
+        id: 'version-1',
+        template_id: TEMPLATE_ID,
+        version: 1,
+        definition: maintenanceTemplate,
+        source_import_id: null,
+        created_at: '2026-09-24T18:22:17Z',
+      });
+      createResponse.mockResolvedValue({
+        ...summary('r-v1', 'draft', 'Visita histórica'),
+        template_version_id: 'version-1',
+        version: 1,
+        values: {},
+        attachments: [],
+      });
+      renderDetail(`/templates/${TEMPLATE_ID}?version=1`);
+
+      expect(await screen.findByText(/ligado a esta versión exacta/)).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: '+ Llenar formulario' }));
+      await user.type(screen.getByLabelText(/Nombre de este llenado/), 'Visita histórica');
+      await user.click(screen.getByRole('button', { name: 'Sí, empezar' }));
+
+      expect(createResponse).toHaveBeenCalledWith(
+        'version-1',
+        'Visita histórica',
         expect.objectContaining({ idempotencyKey: expect.any(String) }),
       );
     });

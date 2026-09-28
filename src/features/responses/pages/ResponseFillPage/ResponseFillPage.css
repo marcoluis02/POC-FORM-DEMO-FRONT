@@ -53,3 +53,21 @@
   flex-wrap: wrap;
   gap: var(--space-3);
 }
+
+@media (max-width: 640px) {
+  .response-fill__title-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .response-fill__footer {
+    position: static;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .response-fill__footer-actions,
+  .response-fill__footer-actions .button {
+    width: 100%;
+  }
+}

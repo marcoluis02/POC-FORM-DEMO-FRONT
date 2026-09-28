@@ -63,20 +63,22 @@ describe('useDraftAutosave', () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
-  it('si el payload cambia durante un save, vuelve a guardar al terminar', async () => {
+  it('si el payload cambia durante un save, guarda el payload más reciente al terminar', async () => {
     let finishFirstSave;
-    const onSave = vi
-      .fn()
-      .mockImplementationOnce(
-        () =>
-          new Promise((resolve) => {
-            finishFirstSave = resolve;
-          }),
-      )
-      .mockResolvedValueOnce(undefined);
+    const savedPayloads = [];
+    const firstSave = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          savedPayloads.push('a');
+          finishFirstSave = resolve;
+        }),
+    );
+    const secondSave = vi.fn(async () => {
+      savedPayloads.push('b');
+    });
 
     const { rerender } = renderHook(
-      ({ payloadKey }) =>
+      ({ payloadKey, onSave }) =>
         useDraftAutosave({
           enabled: true,
           delayMs: 1500,
@@ -84,28 +86,29 @@ describe('useDraftAutosave', () => {
           canSave: true,
           onSave,
         }),
-      { initialProps: { payloadKey: 'a' } },
+      { initialProps: { payloadKey: 'a', onSave: firstSave } },
     );
 
-    // Arranca el primer guardado
+    // Arranca el primer guardado con A.
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1500);
     });
-    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(firstSave).toHaveBeenCalledTimes(1);
 
-    // El usuario sigue escribiendo mientras el primero aún no termina
-    rerender({ payloadKey: 'b' });
+    // Llega B mientras A sigue pendiente. El hook debe conservar lo último.
+    rerender({ payloadKey: 'b', onSave: secondSave });
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1500);
     });
-    // El segundo intento queda en cola; no pisa al que sigue en curso
-    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(secondSave).not.toHaveBeenCalled();
 
-    // Al terminar el primero, se guarda el último payload pendiente
+    // Cuando termina A, se ejecuta B con el callback más reciente.
     await act(async () => {
       finishFirstSave();
       await Promise.resolve();
     });
-    expect(onSave).toHaveBeenCalledTimes(2);
+
+    expect(secondSave).toHaveBeenCalledTimes(1);
+    expect(savedPayloads).toEqual(['a', 'b']);
   });
 });

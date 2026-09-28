@@ -40,12 +40,26 @@ export default function HomePage() {
           celular.
         </p>
       </header>
+      <article className="card stack" aria-labelledby="digitalize-title">
+        <h2 id="digitalize-title" className="home-page__card-title">
+          Digitalizar un formato
+        </h2>
+        <p className="text-secondary">
+          Sube un PDF o una foto, o toma una foto desde el celular para preparar una plantilla.
+        </p>
+        <div className="row">
+          <ButtonLink to={ROUTES.importNew} size="lg">
+            Digitalizar documento
+          </ButtonLink>
+        </div>
+      </article>
+
       <article className="card stack" aria-labelledby="templates-title">
         <h2 id="templates-title" className="home-page__card-title">
           Plantillas
         </h2>
         <p className="text-secondary">
-          Una plantilla es el formato con las preguntas que después se van a contestar.
+          También puedes crear una plantilla manual o consultar las que ya existen.
         </p>
         <div className="row">
           <ButtonLink to={ROUTES.templateNew} size="lg">

@@ -1,12 +1,16 @@
 import { env } from '@/app/config/env';
 
-// Filtro del selector de archivos (solo UI). El backend revisa el contenido real del archivo.
-// Las extensiones van también porque algunos navegadores no reportan el tipo (file.type vacío).
+// Filtros de UI. El backend valida MIME real, tamaño y páginas.
 export const DOCUMENT_UPLOAD = Object.freeze({
-  accept: 'image/jpeg,image/png,image/webp,application/pdf,.jpg,.jpeg,.png,.webp,.pdf',
+  accept: 'image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf',
   maxSizeMb: env.maxUploadMb,
   maxPdfPages: env.maxPdfPages,
   pdfType: 'application/pdf',
+});
+
+export const DOCUMENT_CAPTURE = Object.freeze({
+  accept: 'image/jpeg,image/png,.jpg,.jpeg,.png',
+  capture: 'environment',
 });
 
 export function isPdf(mimeType) {

@@ -10,13 +10,11 @@ export function listResponses(templateId, { cursor, signal } = {}) {
   return apiClient.get(responses, { query: { template_id: templateId, cursor }, signal });
 }
 
-// Empieza un formulario en borrador con la última versión de la plantilla
-export function createResponse(templateId, name, { idempotencyKey } = {}) {
-  return apiClient.post(
-    responses,
-    { template_id: templateId, name },
-    { headers: idempotencyHeaders(idempotencyKey) },
-  );
+// Empieza un formulario ligado a la versión exacta que el usuario está viendo.
+export function createResponse(templateVersionId, name, { idempotencyKey, jobDemoId } = {}) {
+  const body = { template_version_id: templateVersionId, name };
+  if (jobDemoId) body.job_demo_id = jobDemoId;
+  return apiClient.post(responses, body, { headers: idempotencyHeaders(idempotencyKey) });
 }
 
 export function getResponse(responseId, { signal } = {}) {

@@ -1,18 +1,21 @@
-import { Link } from 'react-router';
-import { paths } from '@/app/router/routes';
-import Badge from '@/shared/components/Badge/Badge';
-import { formatDateTime } from '@/shared/utils/formatDate';
-import { RESPONSE_STATUS } from '../../domain/responseStatus';
-import ResponseStatusBadge from '../ResponseStatusBadge/ResponseStatusBadge';
-import './ResponseListItem.css';
+import { Link } from "react-router";
+import { paths } from "@/app/router/routes";
+import Badge from "@/shared/components/Badge/Badge";
+import { formatDateTime } from "@/shared/utils/formatDate";
+import { RESPONSE_STATUS } from "../../domain/responseStatus";
+import ResponseStatusBadge from "../ResponseStatusBadge/ResponseStatusBadge";
+import "./ResponseListItem.css";
 
 // Un formulario llenado del listado. Toda la tarjeta es clicable para abrirlo.
 export default function ResponseListItem({ response }) {
   const submitted = response.status === RESPONSE_STATUS.SUBMITTED;
+  const target = submitted
+    ? paths.responseReport(response.id)
+    : paths.responseDetail(response.id);
 
   return (
     <li>
-      <Link to={paths.responseDetail(response.id)} className="response-list-item">
+      <Link to={target} className="response-list-item">
         <div className="response-list-item__main">
           <span className="response-list-item__title">{response.name}</span>
           <span className="text-secondary text-small">

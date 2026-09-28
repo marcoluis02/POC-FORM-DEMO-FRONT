@@ -11,7 +11,10 @@ export default function AppLayout() {
           <Link to={ROUTES.home} className="app-layout__brand">
             {APP_NAME}
           </Link>
-          <nav aria-label="Principal">
+          <nav aria-label="Principal" className="app-layout__nav">
+            <NavLink to={ROUTES.importNew} className="app-layout__nav-link">
+              Digitalizar
+            </NavLink>
             <NavLink to={ROUTES.templates} className="app-layout__nav-link">
               Plantillas
             </NavLink>

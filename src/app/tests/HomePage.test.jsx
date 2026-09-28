@@ -32,6 +32,17 @@ describe('HomePage', () => {
     expect(await screen.findByText('Conectado')).toBeInTheDocument();
   });
 
+  it('tiene el acceso para digitalizar un documento', () => {
+    getHealth.mockResolvedValue({ status: 'ok', database: 'ok' });
+
+    renderPage();
+
+    expect(screen.getByRole('link', { name: 'Digitalizar documento' })).toHaveAttribute(
+      'href',
+      '/imports/new',
+    );
+  });
+
   it('tiene el acceso para crear una plantilla', () => {
     getHealth.mockResolvedValue({ status: 'ok', database: 'ok' });
 

@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { orderedSections } from '../../domain/answerRules';
-import DynamicField from '../DynamicField/DynamicField';
-import './DynamicForm.css';
+import { useMemo } from "react";
+import { orderedSections } from "../../domain/answerRules";
+import DynamicField from "../DynamicField/DynamicField";
+import "./DynamicForm.css";
 
 const NO_PHOTOS = [];
 
@@ -35,12 +35,21 @@ export default function DynamicForm({
           className="card dynamic-form__section"
           aria-labelledby={`answer-section-${section.id}`}
         >
-          <h2 id={`answer-section-${section.id}`} className="dynamic-form__section-title">
+          <h2
+            id={`answer-section-${section.id}`}
+            className="dynamic-form__section-title"
+          >
             {section.title}
           </h2>
           <ol className="dynamic-form__fields">
             {section.fields.map((field) => (
-              <li key={field.id} id={`field-${field.id}`} className="dynamic-form__field">
+              <li
+                key={field.id}
+                id={`field-${field.id}`}
+                className="dynamic-form__field"
+                tabIndex={errors[field.id] ? -1 : undefined}
+                aria-invalid={errors[field.id] ? true : undefined}
+              >
                 <DynamicField
                   field={field}
                   value={answers[field.id]}
