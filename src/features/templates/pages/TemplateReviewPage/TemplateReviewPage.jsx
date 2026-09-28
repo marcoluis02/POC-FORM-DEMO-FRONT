@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useReducer, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { ROUTES, paths } from '@/app/router/routes';
 import Button from '@/shared/components/Button/Button';
 import ButtonLink from '@/shared/components/ButtonLink/ButtonLink';
@@ -7,11 +7,13 @@ import { useConfirm } from '@/shared/components/ConfirmModal/useConfirm';
 import ErrorState from '@/shared/components/ErrorState/ErrorState';
 import ErrorSummary from '@/shared/components/ErrorSummary/ErrorSummary';
 import Loader from '@/shared/components/Loader/Loader';
+import LoaderModal from '@/shared/components/LoaderModal/LoaderModal';
 import { importWarningMessage } from '@/shared/domain/importContract';
 import { IMPORT_STATUS } from '@/shared/domain/importStatus';
 import { useImport } from '@/shared/hooks/useImport';
 import { useToast } from '@/shared/components/Toast/useToast';
 import { useLocalFilePreview } from '@/shared/hooks/useLocalFilePreview';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { useUnsavedChangesGuard } from '@/shared/hooks/useUnsavedChangesGuard';
 import OriginalDocumentViewer from '../../components/OriginalDocumentViewer/OriginalDocumentViewer';
 import TemplateEditor from '../../components/TemplateEditor/TemplateEditor';
@@ -37,6 +39,25 @@ function initialDraftFor({ template, sourceImport }) {
 const FILE_NOTE = ' También se guardará el documento original que elegiste.';
 const IMPORT_NOTE = ' La plantilla quedará ligada al documento original que generó esta propuesta.';
 const SOURCE_IMPORT_NOT_READY = 'source_import_not_ready';
+
+const MOBILE_QUERY = '(max-width: 720px)';
+const MOBILE_STEP_COUNT = 3;
+const NAME_STEP = 0;
+const PHOTO_STEP = 1;
+const CONTENT_STEP = 2;
+const MOBILE_STEP_TITLES = ['Nombre del formulario (obligatorio)', 'Foto (opcional)', 'Contenido'];
+const TITLE_REQUIRED = 'El formulario necesita un título.';
+
+function stepOfFirstError(errors) {
+  if (errors.some((error) => error.path === 'title')) return NAME_STEP;
+  return CONTENT_STEP;
+}
+
+const SAVE_LOADER_LABEL = Object.freeze({
+  [TEMPLATE_SAVE_PHASE.UPLOADING_DOCUMENT]: 'Subiendo el documento...',
+  [TEMPLATE_SAVE_PHASE.PROCESSING_DOCUMENT]: 'Procesando el documento...',
+  [TEMPLATE_SAVE_PHASE.SAVING_DEFINITION]: 'Guardando la plantilla...',
+});
 
 function saveConfirmation(template, { hasFile, hasSourceImport }) {
   const fileNote = hasFile ? FILE_NOTE : hasSourceImport ? IMPORT_NOTE : '';
@@ -75,6 +96,8 @@ function TemplateReviewWorkspace({ template, sourceImport = null }) {
   const confirm = useConfirm();
   const toast = useToast();
   const summaryRef = useRef(null);
+  const mobile = useMediaQuery(MOBILE_QUERY);
+  const [step, setStep] = useState(NAME_STEP);
   const isNew = !template;
   const fromAi = Boolean(sourceImport);
 
@@ -114,8 +137,24 @@ function TemplateReviewWorkspace({ template, sourceImport = null }) {
     [draft],
   );
 
+  const safeStep = Math.min(step, MOBILE_STEP_COUNT - 1);
+
+  const goToStep = (next) => {
+    setStep(Math.min(Math.max(next, 0), MOBILE_STEP_COUNT - 1));
+    window.scrollTo({ top: 0 });
+  };
+
+  const goNext = () => {
+    if (safeStep === NAME_STEP && !draft.title.trim()) {
+      setErrors([{ path: 'title', message: TITLE_REQUIRED }]);
+      return;
+    }
+    goToStep(safeStep + 1);
+  };
+
   const showErrors = (nextErrors) => {
     setErrors(nextErrors);
+    if (mobile) goToStep(stepOfFirstError(nextErrors));
     requestAnimationFrame(() => summaryRef.current?.focus());
   };
 
@@ -167,18 +206,31 @@ function TemplateReviewWorkspace({ template, sourceImport = null }) {
 
   return (
     <div className="template-review">
-      <header className="stack">
-        <p className="template-review__eyebrow">{fromAi ? 'Revisión de propuesta' : 'Plantilla'}</p>
-        <h1>
-          {fromAi ? 'Revisa la plantilla generada' : isNew ? 'Nueva plantilla' : `Editar: ${template.name}`}
-        </h1>
-        <p className="text-secondary">
-          {fromAi
-            ? 'Compara el documento original con la propuesta de IA. Corrige, agrega, elimina o reordena lo necesario y confirma cuando esté lista.'
-            : isNew
-              ? 'Escribe el nombre del formulario, agrega las secciones y las preguntas. Al terminar, presiona "Guardar plantilla".'
-              : `Estás editando la versión ${template.latest_version}. Al guardar se crea la versión ${template.latest_version + 1}.`}
-        </p>
+      <header className="template-review__header">
+        <div className="stack">
+          <p className="template-review__eyebrow">
+            <Link to={ROUTES.templates}>Plantillas</Link>
+            <span aria-hidden="true"> / </span>
+            {fromAi ? 'Propuesta' : isNew ? 'Nueva plantilla' : 'Editar'}
+          </p>
+          <h1>
+            {fromAi
+              ? 'Revisa la plantilla generada'
+              : isNew
+                ? draft.title.trim()
+                  ? `Nueva plantilla: ${draft.title.trim()}`
+                  : 'Nueva plantilla'
+                : `Editar: ${template.name}`}
+          </h1>
+          <p className="text-secondary">
+            {fromAi
+              ? 'Ajusta la propuesta y guarda.'
+              : isNew
+                ? 'Arma las secciones y guarda.'
+                : `Al guardar se crea la versión ${template.latest_version + 1}.`}
+          </p>
+        </div>
+        {!isNew && <span className="template-review__version">Versión {template.latest_version}</span>}
       </header>
 
       <ImportWarnings warnings={sourceImport?.warnings} />
@@ -211,8 +263,22 @@ function TemplateReviewWorkspace({ template, sourceImport = null }) {
         messages={summaryMessages}
       />
 
+      {mobile && (
+        <div className="template-review__steps">
+          <p className="template-review__steps-label">
+            Paso {safeStep + 1} de {MOBILE_STEP_COUNT} · {MOBILE_STEP_TITLES[safeStep]}
+          </p>
+          <div className="template-review__steps-track">
+            <div
+              className="template-review__steps-fill"
+              style={{ '--step-progress': `${((safeStep + 1) / MOBILE_STEP_COUNT) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="template-review__layout">
-        <div className="template-review__original">
+        <div className="template-review__original" hidden={mobile && safeStep !== PHOTO_STEP}>
           <OriginalDocumentViewer
             file={original.file}
             fileUrl={original.url}
@@ -223,38 +289,53 @@ function TemplateReviewWorkspace({ template, sourceImport = null }) {
             allowReplace={!fromAi}
           />
         </div>
-        <div className="template-review__editor">
+        <div className="template-review__editor" hidden={mobile && safeStep === PHOTO_STEP}>
           <TemplateEditor
             draft={draft}
             dispatch={dispatchDraft}
             errors={errorsByPath}
             disabled={saveTemplate.isPending}
+            showDetails={!mobile || safeStep === NAME_STEP}
+            showSections={!mobile || safeStep === CONTENT_STEP}
           />
         </div>
       </div>
 
-      <footer className="template-review__footer">
+      <LoaderModal
+        open={saveTemplate.isPending}
+        label={SAVE_LOADER_LABEL[saveTemplate.phase] ?? 'Guardando la plantilla...'}
+      />
+      <footer className={mobile ? 'template-review__footer template-review__footer--steps' : 'template-review__footer'}>
         {!isNew && !hasChanges && (
-          <p className="text-secondary text-small">
-            Haz algún cambio para guardar una nueva versión.
-          </p>
+          <p className="template-review__hint">Haz algún cambio para guardar una nueva versión.</p>
         )}
         <div className="template-review__footer-actions">
-          <ButtonLink
-            variant="secondary"
-            size="lg"
-            to={isNew ? ROUTES.templates : paths.templateDetail(template.id)}
-          >
-            Cancelar
-          </ButtonLink>
-          <Button
-            size="lg"
-            onClick={handleSave}
-            loading={saveTemplate.isPending}
-            disabled={!isNew && !hasChanges}
-          >
-            {isNew ? 'Guardar plantilla' : 'Guardar nueva versión'}
-          </Button>
+          {mobile && safeStep > NAME_STEP ? (
+            <Button variant="secondary" size="lg" onClick={() => goToStep(safeStep - 1)}>
+              Anterior
+            </Button>
+          ) : (
+            <ButtonLink
+              variant="secondary"
+              size="lg"
+              to={isNew ? ROUTES.templates : paths.templateDetail(template.id)}
+            >
+              Cancelar
+            </ButtonLink>
+          )}
+          {mobile && safeStep < CONTENT_STEP ? (
+            <Button size="lg" onClick={goNext}>
+              Siguiente
+            </Button>
+          ) : (
+            <Button
+              size="lg"
+              onClick={handleSave}
+              disabled={saveTemplate.isPending || (!isNew && !hasChanges)}
+            >
+              {isNew ? 'Guardar plantilla' : 'Guardar nueva versión'}
+            </Button>
+          )}
         </div>
       </footer>
     </div>
@@ -271,7 +352,7 @@ export default function TemplateReviewPage() {
   const importQuery = useImport(importId, { poll: true });
 
   if (templateId) {
-    if (templateQuery.isPending) return <Loader label="Cargando la plantilla..." fullPage />;
+    if (templateQuery.isPending) return <LoaderModal open label="Cargando la plantilla..." />;
     if (templateQuery.isError) {
       return (
         <TemplateLoadError

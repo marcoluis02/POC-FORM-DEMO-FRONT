@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { PlusIcon } from 'lucide-animated';
 import { useNavigate } from 'react-router';
 import { paths } from '@/app/router/routes';
+import AnimatedIcon from '@/shared/components/AnimatedIcon/AnimatedIcon';
 import Button from '@/shared/components/Button/Button';
 import EmptyState from '@/shared/components/EmptyState/EmptyState';
 import ErrorState from '@/shared/components/ErrorState/ErrorState';
 import Loader from '@/shared/components/Loader/Loader';
 import { useToast } from '@/shared/components/Toast/useToast';
+import { useAnimatedIcon } from '@/shared/hooks/useAnimatedIcon';
 import { useCreateResponse } from '../../hooks/useCreateResponse';
 import { useResponsesList } from '../../hooks/useResponsesList';
 import ResponseListItem from '../ResponseListItem/ResponseListItem';
@@ -75,6 +78,7 @@ export default function ResponsesSection({ templateId, templateVersionId, versio
   const toast = useToast();
   const createResponse = useCreateResponse(templateVersionId);
   const [askingName, setAskingName] = useState(false);
+  const plus = useAnimatedIcon();
 
   const handleStart = async (name) => {
     let created;
@@ -90,7 +94,7 @@ export default function ResponsesSection({ templateId, templateVersionId, versio
   };
 
   return (
-    <section className="card responses-section" aria-labelledby="responses-section-title">
+    <section className="responses-section" aria-labelledby="responses-section-title">
       <div className="responses-section__header">
         <div>
           <h2 id="responses-section-title" className="responses-section__title">
@@ -101,10 +105,17 @@ export default function ResponsesSection({ templateId, templateVersionId, versio
           </p>
         </div>
         <Button
+          className="responses-section__start"
+          aria-label="+ Llenar formulario"
           onClick={() => setAskingName(true)}
           disabled={createResponse.isPending || !templateVersionId}
+          onMouseEnter={plus.onMouseEnter}
+          onMouseLeave={plus.onMouseLeave}
+          onFocus={plus.onFocus}
+          onBlur={plus.onBlur}
         >
-          + Llenar formulario
+          <AnimatedIcon icon={PlusIcon} iconRef={plus.ref} size={18} />
+          Llenar formulario
         </Button>
       </div>
       <ResponsesList templateId={templateId} />

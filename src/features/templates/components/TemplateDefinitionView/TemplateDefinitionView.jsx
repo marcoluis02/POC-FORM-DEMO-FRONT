@@ -6,16 +6,23 @@ import './TemplateDefinitionView.css';
 export default function TemplateDefinitionView({ definition }) {
   return (
     <div className="template-definition">
-      {[...definition.sections].sort(byPosition).map((section) => (
+      {[...definition.sections].sort(byPosition).map((section, sectionIndex) => (
         <section
           key={section.id}
-          className="card template-definition__section"
+          className="template-definition__section"
           aria-labelledby={`section-${section.id}`}
         >
-          <h3 id={`section-${section.id}`}>{section.title}</h3>
+          <h3 id={`section-${section.id}`} className="template-definition__heading">
+            <span className="template-definition__index">{sectionIndex + 1}</span>
+            {section.title}
+          </h3>
           <ol className="template-definition__fields">
-            {[...section.fields].sort(byPosition).map((field, index) => (
-              <TemplateField key={field.id} field={field} number={index + 1} />
+            {[...section.fields].sort(byPosition).map((field, fieldIndex) => (
+              <TemplateField
+                key={field.id}
+                field={field}
+                number={`${sectionIndex + 1}.${fieldIndex + 1}`}
+              />
             ))}
           </ol>
         </section>

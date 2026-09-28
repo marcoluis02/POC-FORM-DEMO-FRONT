@@ -1,15 +1,81 @@
 .select {
-  appearance: none;
-  padding-right: var(--space-7);
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%),
-    linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%);
-  background-position:
-    calc(100% - 1.4rem) 50%,
-    calc(100% - 1rem) 50%;
-  background-size:
-    0.4rem 0.4rem,
-    0.4rem 0.4rem;
-  background-repeat: no-repeat;
+  position: relative;
+  width: 100%;
+}
+
+.select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font: inherit;
+  text-align: left;
   cursor: pointer;
+}
+
+.select__trigger:disabled {
+  cursor: not-allowed;
+}
+
+.select__value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select__trigger--placeholder .select__value {
+  color: var(--text-muted);
+}
+
+.select__trigger::after {
+  content: '';
+  flex-shrink: 0;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-right: var(--space-1);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-0.12rem) rotate(45deg);
+}
+
+.select--open .select__trigger::after {
+  transform: translateY(0.12rem) rotate(225deg);
+}
+
+.select__menu {
+  margin: 0;
+  padding: var(--space-2);
+  list-style: none;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  max-height: 16rem;
+  overflow: auto;
+}
+
+.select__option {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.select__option--active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.select__option--selected,
+.select__option--selected.select__option--active {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 }

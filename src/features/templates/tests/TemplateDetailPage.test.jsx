@@ -29,6 +29,7 @@ const EMPTY_PAGE = { items: [], next_cursor: null };
 
 beforeEach(() => {
   listResponses.mockResolvedValue(EMPTY_PAGE);
+  delete window.matchMedia;
 });
 
 const TEMPLATE_ID = '97787fca-eee7-4b42-92fd-b1d8c59062e3';
@@ -96,6 +97,28 @@ describe('TemplateDetailPage', () => {
     expect(getTemplateVersion).not.toHaveBeenCalled();
   });
 
+  it('en celular separa contenido y formularios en pestañas', async () => {
+    const user = userEvent.setup();
+    getTemplate.mockResolvedValue(templateV2);
+    window.matchMedia = vi.fn().mockImplementation((query) => ({
+      matches: true,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    renderDetail();
+
+    expect(await screen.findByRole('tab', { name: 'Contenido' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('¿Se limpió el filtro?')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Formularios llenados' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: 'Formularios' }));
+
+    expect(screen.getByRole('heading', { name: 'Formularios llenados' })).toBeInTheDocument();
+    expect(document.getElementById('template-panel-content')).toHaveAttribute('hidden');
+    expect(document.getElementById('template-panel-forms')).not.toHaveAttribute('hidden');
+  });
+
   it('permite consultar una versión anterior', async () => {
     const user = userEvent.setup();
     getTemplate.mockResolvedValue(templateV2);
@@ -108,7 +131,8 @@ describe('TemplateDetailPage', () => {
     });
     const { router } = renderDetail();
 
-    await user.selectOptions(await screen.findByLabelText('Ver versión'), '1');
+    await user.click(await screen.findByLabelText('Ver versión'));
+    await user.click(screen.getByRole('option', { name: 'Versión 1' }));
 
     expect(await screen.findByText(/Estás viendo la versión 1/)).toBeInTheDocument();
     expect(getTemplateVersion).toHaveBeenCalledWith(TEMPLATE_ID, 1, expect.anything());
@@ -119,7 +143,7 @@ describe('TemplateDetailPage', () => {
     getTemplate.mockResolvedValue(templateV2);
     renderDetail(`/templates/${TEMPLATE_ID}?version=99`);
 
-    expect(await screen.findByLabelText('Ver versión')).toHaveValue('2');
+    expect(await screen.findByLabelText('Ver versión')).toHaveTextContent('Versión 2 (actual)');
     expect(getTemplateVersion).not.toHaveBeenCalled();
   });
 
@@ -145,7 +169,8 @@ describe('TemplateDetailPage', () => {
     renderDetail();
 
     expect(await screen.findByText('Documento original')).toBeInTheDocument();
-    await user.selectOptions(screen.getByLabelText('Ver versión'), '1');
+    await user.click(screen.getByLabelText('Ver versión'));
+    await user.click(screen.getByRole('option', { name: 'Versión 1' }));
 
     expect(await screen.findByText(/Estás viendo la versión 1/)).toBeInTheDocument();
     expect(screen.queryByText('Documento original')).not.toBeInTheDocument();

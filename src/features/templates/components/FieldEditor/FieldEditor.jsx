@@ -1,9 +1,12 @@
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from 'lucide-animated';
 import Button from '@/shared/components/Button/Button';
+import AnimatedIcon from '@/shared/components/AnimatedIcon/AnimatedIcon';
 import Checkbox from '@/shared/components/Checkbox/Checkbox';
 import Input from '@/shared/components/Input/Input';
 import Select from '@/shared/components/Select/Select';
 import {
   FIELD_TYPE_OPTIONS,
+  answerPreview,
   createEmptyOption,
   supportsOptions,
   supportsUnit,
@@ -16,6 +19,7 @@ import './FieldEditor.css';
 export default function FieldEditor({
   field,
   number,
+  sectionNumber,
   isFirst,
   isLast,
   canRemove,
@@ -51,63 +55,85 @@ export default function FieldEditor({
 
   return (
     <li className="field-editor">
-      <div className="field-editor__header">
-        <span className="field-editor__number">Pregunta {number}</span>
+      <div className="field-editor__write">
+        <span className="field-editor__index">
+          {sectionNumber}.{number}
+        </span>
+        <div className="field-editor__question">
+          <Input
+            label="Pregunta"
+            placeholder="Escribe la pregunta"
+            value={field.label}
+            maxLength={TEMPLATE_LIMITS.labelMaxLength}
+            error={errors.label}
+            disabled={disabled}
+            onChange={(event) => onChange({ label: event.target.value })}
+          />
+        </div>
         <div className="field-editor__actions">
           <Button
             variant="ghost"
             size="sm"
+            className="field-editor__icon"
             onClick={() => onMove(MOVE_DIRECTION.UP)}
             disabled={disabled || isFirst}
             aria-label={`Subir pregunta ${number}`}
           >
-            ↑ Subir
+            <AnimatedIcon icon={ChevronUpIcon} size={16} />
           </Button>
           <Button
             variant="ghost"
             size="sm"
+            className="field-editor__icon"
             onClick={() => onMove(MOVE_DIRECTION.DOWN)}
             disabled={disabled || isLast}
             aria-label={`Bajar pregunta ${number}`}
           >
-            ↓ Bajar
+            <AnimatedIcon icon={ChevronDownIcon} size={16} />
           </Button>
           {canRemove && (
             <Button
               variant="ghost-danger"
               size="sm"
+              className="field-editor__icon"
               onClick={onRemove}
               disabled={disabled}
               aria-label={`Eliminar pregunta ${number}`}
             >
-              Eliminar
+              <AnimatedIcon icon={DeleteIcon} size={16} />
             </Button>
           )}
         </div>
       </div>
+      <div className="field-editor__meta">
+        <div className="field-editor__type">
+          <Select
+            label="Tipo de respuesta"
+            options={FIELD_TYPE_OPTIONS}
+            placeholder=""
+            value={field.type}
+            error={errors.type}
+            disabled={disabled}
+            onChange={(event) => onChange({ type: event.target.value })}
+          />
+        </div>
+        <div className="field-editor__required-line">
+          <Checkbox
+            className="field-editor__required"
+            label="Obligatorio"
+            checked={field.required}
+            disabled={disabled}
+            onChange={(event) => onChange({ required: event.target.checked })}
+          />
+        </div>
+      </div>
 
-      <Input
-        label="Pregunta"
-        placeholder="Ej. ¿Se limpió el filtro?"
-        value={field.label}
-        maxLength={TEMPLATE_LIMITS.labelMaxLength}
-        error={errors.label}
-        disabled={disabled}
-        required
-        onChange={(event) => onChange({ label: event.target.value })}
-      />
+      <p className="field-editor__preview" aria-hidden="true">
+        {answerPreview(field.type)}
+      </p>
 
-      <div className="field-editor__grid">
-        <Select
-          label="Tipo de respuesta"
-          options={FIELD_TYPE_OPTIONS}
-          placeholder=""
-          value={field.type}
-          error={errors.type}
-          disabled={disabled}
-          onChange={(event) => onChange({ type: event.target.value })}
-        />
-        {showUnit && (
+      {showUnit && (
+        <div className="field-editor__grid">
           <Input
             label="Unidad (opcional)"
             hint="Ej. °F, kg, psi"
@@ -117,8 +143,8 @@ export default function FieldEditor({
             disabled={disabled}
             onChange={(event) => onChange({ unit: event.target.value })}
           />
-        )}
-      </div>
+        </div>
+      )}
 
       {showChoices && (
         <div className="field-editor__choices">
@@ -172,21 +198,6 @@ export default function FieldEditor({
           </ol>
         </div>
       )}
-
-      <div className="field-editor__flags">
-        <Checkbox
-          label="Es obligatoria"
-          checked={field.required}
-          disabled={disabled}
-          onChange={(event) => onChange({ required: event.target.checked })}
-        />
-        <Checkbox
-          label="Permitir foto de evidencia"
-          checked={field.allow_evidence}
-          disabled={disabled}
-          onChange={(event) => onChange({ allow_evidence: event.target.checked })}
-        />
-      </div>
     </li>
   );
 }

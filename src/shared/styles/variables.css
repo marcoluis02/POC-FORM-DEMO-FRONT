@@ -1,23 +1,28 @@
 :root {
   /* Colores de marca */
-  --color-primary: #1d4ed8;
-  --color-primary-hover: #1e40af;
-  --color-primary-soft: #dbeafe;
-  --color-on-primary: #ffffff;
+  --color-primary: #0e4d45;
+  --color-primary-hover: #08362f;
+  --color-primary-soft: #d7ebe4;
+  --color-on-primary: #fff8ee;
+  --color-accent: #e07a3d;
+  --color-accent-hover: #c4622a;
+  --color-header: #14221f;
+  --color-header-muted: #c9bfb0;
+  --color-header-ok: #8dcea8;
 
   /* Fondos y bordes */
-  --color-bg: #f5f7fb;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f1f5f9;
-  --color-border: #d6dde8;
-  --color-border-strong: #94a3b8;
-  --color-overlay: rgb(15 23 42 / 55%);
+  --color-bg: #efe6d6;
+  --color-surface: #fffaf3;
+  --color-surface-muted: #f3eadc;
+  --color-border: #e2d5c3;
+  --color-border-strong: #b7a48c;
+  --color-overlay: rgb(20 34 31 / 55%);
 
   /* Texto */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --text-on-dark: #ffffff;
+  --text-primary: #1c1914;
+  --text-secondary: #5c5348;
+  --text-muted: #8a7d6b;
+  --text-on-dark: #f6f1e7;
 
   /* Estados */
   --color-success: #15803d;
@@ -27,18 +32,20 @@
   --color-danger: #b91c1c;
   --color-danger-hover: #991b1b;
   --color-danger-soft: #fee2e2;
-  --color-info: #1d4ed8;
-  --color-info-soft: #dbeafe;
-  --color-focus: #2563eb;
+  --color-info: #0e4d45;
+  --color-info-soft: #d7ebe4;
+  --color-focus: #0e4d45;
 
   /* Tipografía */
-  --font-sans: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  --font-sans: Outfit, 'Segoe UI', system-ui, sans-serif;
+  --font-display: Fraunces, Georgia, 'Times New Roman', serif;
   --font-size-xs: 0.8125rem;
   --font-size-sm: 0.9375rem;
   --font-size-md: 1.0625rem;
   --font-size-lg: 1.25rem;
   --font-size-xl: 1.5rem;
   --font-size-2xl: 1.875rem;
+  --font-size-3xl: 2.25rem;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -62,10 +69,10 @@
   --radius-full: 999px;
   --border-width: 1px;
   --border-width-strong: 2px;
-  --shadow-sm: 0 1px 2px rgb(15 23 42 / 8%);
-  --shadow-md: 0 4px 12px rgb(15 23 42 / 10%);
-  --shadow-lg: 0 16px 40px rgb(15 23 42 / 18%);
-  --focus-ring: 0 0 0 3px rgb(37 99 235 / 35%);
+  --shadow-sm: 0 1px 2px rgb(28 25 20 / 6%);
+  --shadow-md: 0 10px 30px rgb(28 25 20 / 8%);
+  --shadow-lg: 0 24px 50px rgb(20 34 31 / 18%);
+  --focus-ring: 0 0 0 3px rgb(224 122 61 / 40%);
 
   /* Tamaños de controles (grandes para tocar fácil en celular) */
   --control-height: 3rem;
@@ -80,6 +87,7 @@
   --layout-max-width: 1200px;
   --viewer-max-height: 75vh;
   --modal-max-width: 480px;
+  --modal-wide-max-width: 920px;
   --toast-max-width: 420px;
   --header-height: 4rem;
 

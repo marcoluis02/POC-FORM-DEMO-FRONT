@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import { ArrowLeftIcon, FileTextIcon } from "lucide-animated";
 import { useNavigate, useParams } from "react-router";
 import { env } from "@/app/config/env";
 import { paths } from "@/app/router/routes";
 import { useTemplateVersion } from "@/features/templates/hooks/useTemplateVersion";
+import AnimatedIcon from "@/shared/components/AnimatedIcon/AnimatedIcon";
 import Badge from "@/shared/components/Badge/Badge";
 import Button from "@/shared/components/Button/Button";
 import ButtonLink from "@/shared/components/ButtonLink/ButtonLink";
@@ -10,8 +12,9 @@ import { useConfirm } from "@/shared/components/ConfirmModal/useConfirm";
 import ErrorState from "@/shared/components/ErrorState/ErrorState";
 import ErrorSummary from "@/shared/components/ErrorSummary/ErrorSummary";
 import Input from "@/shared/components/Input/Input";
-import Loader from "@/shared/components/Loader/Loader";
+import LoaderModal from "@/shared/components/LoaderModal/LoaderModal";
 import { useToast } from "@/shared/components/Toast/useToast";
+import { useAnimatedIcon } from "@/shared/hooks/useAnimatedIcon";
 import { useUnsavedChangesGuard } from "@/shared/hooks/useUnsavedChangesGuard";
 import { formatDateTime } from "@/shared/utils/formatDate";
 import DynamicForm from "../../components/DynamicForm/DynamicForm";
@@ -68,6 +71,8 @@ function ResponseWorkspace({ response, definition }) {
   const confirm = useConfirm();
   const toast = useToast();
   const navigate = useNavigate();
+  const backIcon = useAnimatedIcon();
+  const reportIcon = useAnimatedIcon();
 
   const [name, setName] = useState(response.name);
   const [answers, setAnswers] = useState(() =>
@@ -266,39 +271,51 @@ function ResponseWorkspace({ response, definition }) {
 
   return (
     <div className="response-fill">
-      <div>
-        <ButtonLink
-          to={paths.templateDetail(response.template_id)}
-          variant="ghost"
-          size="sm"
-        >
-          ← Volver a la plantilla
-        </ButtonLink>
-      </div>
+      <ButtonLink
+        className="response-fill__back"
+        to={paths.templateDetail(response.template_id)}
+        variant="ghost"
+        size="sm"
+        onMouseEnter={backIcon.onMouseEnter}
+        onMouseLeave={backIcon.onMouseLeave}
+        onFocus={backIcon.onFocus}
+        onBlur={backIcon.onBlur}
+      >
+        <AnimatedIcon icon={ArrowLeftIcon} iconRef={backIcon.ref} size={16} />
+        Volver a la plantilla
+      </ButtonLink>
 
       <header className="card response-fill__header">
         <div className="response-fill__title-row">
-          <h1>{isSubmitted ? response.name : "Contestar formulario"}</h1>
-          <div className="response-fill__badges">
-            <ResponseStatusBadge status={response.status} />
-            <Badge tone="info">Versión {response.version}</Badge>
+          <div className="response-fill__title">
+            <h1>{isSubmitted ? response.name : "Contestar formulario"}</h1>
+            <p className="response-fill__meta">
+              Plantilla: {definition.title} · Empezado:{" "}
+              {formatDateTime(response.created_at)}
+              {isSubmitted
+                ? ` · Enviado: ${formatDateTime(response.submitted_at)}`
+                : ` · Último guardado: ${formatDateTime(response.updated_at)}`}
+            </p>
           </div>
-        </div>
-        <p className="text-secondary text-small">
-          Plantilla: {definition.title} · Empezado:{" "}
-          {formatDateTime(response.created_at)}
-          {isSubmitted
-            ? ` · Enviado: ${formatDateTime(response.submitted_at)}`
-            : ` · Último guardado: ${formatDateTime(response.updated_at)}`}
-        </p>
-        <div>
-          <ButtonLink
-            to={paths.responseReport(response.id)}
-            variant="secondary"
-            size="sm"
-          >
-            Ver reporte
-          </ButtonLink>
+          <div className="response-fill__title-actions">
+            <div className="response-fill__badges">
+              <ResponseStatusBadge status={response.status} />
+              <Badge tone="info">Versión {response.version}</Badge>
+            </div>
+            <ButtonLink
+              className="response-fill__report"
+              to={paths.responseReport(response.id)}
+              variant="secondary"
+              size="sm"
+              onMouseEnter={reportIcon.onMouseEnter}
+              onMouseLeave={reportIcon.onMouseLeave}
+              onFocus={reportIcon.onFocus}
+              onBlur={reportIcon.onBlur}
+            >
+              <AnimatedIcon icon={FileTextIcon} iconRef={reportIcon.ref} size={16} />
+              Ver reporte
+            </ButtonLink>
+          </div>
         </div>
         {isSubmitted ? (
           <p className="response-fill__notice" role="status">
@@ -317,9 +334,9 @@ function ResponseWorkspace({ response, definition }) {
               disabled={saving || photoBusy}
               onChange={handleNameChange}
             />
-            <p className="text-secondary">
-              Contesta las preguntas. El borrador se guarda solo al dejar de
-              escribir. Las fotos se guardan en cuanto las subes.
+            <p className="response-fill__hint">
+              El borrador se guarda solo al dejar de escribir. Las fotos, al
+              subirlas.
             </p>
           </>
         )}
@@ -380,7 +397,7 @@ export default function ResponseFillPage() {
   );
 
   if (responseQuery.isPending)
-    return <Loader label="Cargando el formulario..." fullPage />;
+    return <LoaderModal open label="Cargando el formulario..." />;
   if (responseQuery.isError) {
     return (
       <ResponseLoadError
@@ -391,7 +408,7 @@ export default function ResponseFillPage() {
     );
   }
   if (versionQuery.isPending)
-    return <Loader label="Cargando las preguntas..." fullPage />;
+    return <LoaderModal open label="Cargando las preguntas..." />;
   if (versionQuery.isError) {
     return (
       <ErrorState

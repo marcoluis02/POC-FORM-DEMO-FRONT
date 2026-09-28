@@ -66,7 +66,7 @@ describe('TemplatesListPage', () => {
     renderList();
 
     expect(await screen.findByText('Todavía no hay plantillas')).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: '+ Crear plantilla' })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: '+ Crear plantilla' })).toHaveLength(2);
   });
 
   it('muestra el error y permite reintentar', async () => {

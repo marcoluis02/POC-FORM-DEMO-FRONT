@@ -4,7 +4,6 @@
   gap: var(--space-5);
 }
 
-.response-report__top-actions,
 .response-report__badges {
   display: flex;
   flex-wrap: wrap;
@@ -12,7 +11,16 @@
 }
 
 .response-report__top-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
   justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.response-report__top-actions .button {
+  width: auto;
+  white-space: nowrap;
 }
 
 .response-report__header {
@@ -73,24 +81,8 @@
 }
 
 @media (max-width: 640px) {
-  .response-report__top-actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .response-report__top-actions .button {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 640px) {
   .response-report__title-row {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .response-report__top-actions > *,
-  .response-report__top-actions .button {
-    width: 100%;
   }
 }

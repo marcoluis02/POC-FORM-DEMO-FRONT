@@ -53,7 +53,7 @@ describe("ImportStatusPage", () => {
       await screen.findByRole("heading", { name: "Analizando documento" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Analizando documento...")).toBeInTheDocument();
-    expect(screen.getByText(/servidor reintenta automáticamente/)).toBeInTheDocument();
+    expect(screen.getByText('Identificando secciones y preguntas.')).toBeInTheDocument();
   });
 
   it("detiene el flujo en failed y permite comenzar otra importación", async () => {

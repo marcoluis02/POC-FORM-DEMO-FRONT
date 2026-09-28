@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { paths } from '@/app/router/routes';
 import Button from '@/shared/components/Button/Button';
 import DocumentPreview from '@/shared/components/DocumentPreview/DocumentPreview';
@@ -15,6 +15,8 @@ const CAMERA_HINT = 'En celular intentará abrir la cámara trasera. También pu
 
 export default function ImportPage() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const modo = params.get('modo');
   const preview = useLocalFilePreview();
   const createImport = useCreateImport();
   const [submitError, setSubmitError] = useState(null);
@@ -45,12 +47,8 @@ export default function ImportPage() {
   return (
     <section className="import-page stack">
       <header className="stack import-page__header">
-        <p className="import-page__eyebrow">Nueva digitalización</p>
-        <h1>Convierte tu formato en una plantilla digital</h1>
-        <p className="text-secondary">
-          Sube el PDF o la foto del checklist. La propuesta generada se revisará antes de crear la
-          plantilla.
-        </p>
+        <h1>{modo === 'foto' ? 'Tomar foto' : 'Subir documento'}</h1>
+        <p className="text-secondary">Después se abre el análisis.</p>
       </header>
 
       {!preview.file ? (

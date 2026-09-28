@@ -29,20 +29,23 @@ export default function DynamicForm({
 
   return (
     <div className="dynamic-form">
-      {sections.map((section) => (
+      {sections.map((section, index) => (
         <section
           key={section.id}
           className="card dynamic-form__section"
           aria-labelledby={`answer-section-${section.id}`}
         >
-          <h2
-            id={`answer-section-${section.id}`}
-            className="dynamic-form__section-title"
-          >
-            {section.title}
-          </h2>
+          <div className="dynamic-form__heading">
+            <span className="dynamic-form__index">{index + 1}</span>
+            <h2
+              id={`answer-section-${section.id}`}
+              className="dynamic-form__section-title"
+            >
+              {section.title}
+            </h2>
+          </div>
           <ol className="dynamic-form__fields">
-            {section.fields.map((field) => (
+            {section.fields.map((field, fieldIndex) => (
               <li
                 key={field.id}
                 id={`field-${field.id}`}
@@ -51,6 +54,7 @@ export default function DynamicForm({
                 aria-invalid={errors[field.id] ? true : undefined}
               >
                 <DynamicField
+                  number={`${index + 1}.${fieldIndex + 1}`}
                   field={field}
                   value={answers[field.id]}
                   error={errors[field.id]}

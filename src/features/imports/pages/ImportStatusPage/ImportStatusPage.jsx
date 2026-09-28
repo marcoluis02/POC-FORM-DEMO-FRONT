@@ -7,6 +7,7 @@ import DocumentPreview from '@/shared/components/DocumentPreview/DocumentPreview
 import ErrorState from '@/shared/components/ErrorState/ErrorState';
 import Loader from '@/shared/components/Loader/Loader';
 import { isPdf } from '@/shared/domain/documentUpload';
+import { importWarningMessage } from '@/shared/domain/importContract';
 import { IMPORT_STATUS } from '@/shared/domain/importStatus';
 import { useImport } from '@/shared/hooks/useImport';
 import './ImportStatusPage.css';
@@ -14,11 +15,13 @@ import './ImportStatusPage.css';
 const STATUS_COPY = Object.freeze({
   [IMPORT_STATUS.RECEIVED]: {
     title: 'Documento recibido',
-    message: 'Preparando el análisis del documento...',
+    message: 'En cola.',
+    loader: 'Preparando análisis...',
   },
   [IMPORT_STATUS.PROCESSING]: {
     title: 'Analizando documento',
-    message: 'La IA está identificando secciones, preguntas y tipos de campo. Si el proveedor tarda o está ocupado, el servidor reintenta automáticamente sin crear otra importación.',
+    message: 'Identificando secciones y preguntas.',
+    loader: 'Analizando documento...',
   },
 });
 
@@ -50,22 +53,49 @@ export default function ImportStatusPage() {
   }
 
   if (imported.status === IMPORT_STATUS.FAILED) {
+    const warnings = (imported.warnings ?? []).map(importWarningMessage).filter(Boolean);
     return (
-      <section className="import-status-page stack">
-        <header className="stack">
-          <p className="import-status-page__eyebrow">Digitalización</p>
+      <section className="import-failure">
+        <header className="import-failure__header">
+          <p className="import-failure__kicker">La IA no pudo leer el documento</p>
           <h1>No pudimos convertir este documento</h1>
+          <p className="import-failure__message">
+            {imported.error_message || 'Intenta con otro archivo.'}
+          </p>
         </header>
-        <ErrorState
-          title="La importación necesita otro intento"
-          message={
-            imported.error_message ||
-            'No fue posible obtener un formulario utilizable. Prueba con otro archivo o una foto más clara.'
-          }
-        />
-        <div>
+
+        <article className="import-failure__card">
+          <div className="import-failure__file">
+            <strong>{imported.original_filename}</strong>
+            <span>
+              {[
+                imported.page_count ? `${imported.page_count} páginas` : null,
+                isPdf(imported.mime_type) ? 'PDF' : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </span>
+            {imported.original_url && (
+              <a href={imported.original_url} target="_blank" rel="noreferrer">
+                Ver archivo
+              </a>
+            )}
+          </div>
+          {warnings.length > 0 && (
+            <ul className="import-failure__warnings">
+              {warnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+          )}
+        </article>
+
+        <div className="import-failure__actions">
           <ButtonLink to={ROUTES.importNew} size="lg">
             Subir otro archivo
+          </ButtonLink>
+          <ButtonLink to={ROUTES.templateNew} variant="secondary" size="lg">
+            Crear plantilla manualmente
           </ButtonLink>
         </div>
       </section>
@@ -80,45 +110,41 @@ export default function ImportStatusPage() {
   const tone = imported.status === IMPORT_STATUS.PROCESSING ? 'info' : 'neutral';
 
   return (
-    <section className="import-status-page stack">
-      <header className="stack">
-        <div className="import-status-page__title-row">
-          <div>
-            <p className="import-status-page__eyebrow">Digitalización</p>
-            <h1>{copy.title}</h1>
-          </div>
-          <Badge tone={tone}>
-            {imported.status === IMPORT_STATUS.PROCESSING ? 'Procesando' : 'Recibido'}
-          </Badge>
+    <section className="import-status-page">
+      <header className="import-status-page__title-row">
+        <div>
+          <h1>{copy.title}</h1>
+          <p className="text-secondary">{copy.message}</p>
         </div>
-        <p className="text-secondary">{copy.message}</p>
+        <Badge tone={tone}>
+          {imported.status === IMPORT_STATUS.PROCESSING ? 'Procesando' : 'Recibido'}
+        </Badge>
       </header>
 
-      <article className="card stack import-status-page__card">
-        <Loader
-          label={
-            imported.status === IMPORT_STATUS.PROCESSING
-              ? 'Analizando documento...'
-              : 'Preparando análisis...'
-          }
-        />
-        {imported.original_filename && (
-          <p className="text-secondary import-status-page__filename">{imported.original_filename}</p>
-        )}
-        {imported.original_url && imported.original_filename && imported.mime_type && (
-          <div className="import-status-page__preview">
+      <div className="import-status-page__work">
+        <article className="card import-status-page__preview">
+          {imported.original_filename && (
+            <p className="import-status-page__filename">{imported.original_filename}</p>
+          )}
+          {imported.original_url && imported.original_filename && imported.mime_type ? (
             <DocumentPreview
               url={imported.original_url}
               name={imported.original_filename}
               pdf={isPdf(imported.mime_type)}
             />
-          </div>
-        )}
-      </article>
+          ) : (
+            <p className="text-secondary">Documento en proceso.</p>
+          )}
+        </article>
 
-      <p className="text-secondary text-small">
-        Puedes dejar esta pantalla abierta. En cuanto termine el análisis se abrirá la revisión.
-      </p>
+        <aside className="card stack import-status-page__status">
+          <Loader label={copy.loader} />
+          <p className="text-secondary text-small">Al terminar se abre la revisión.</p>
+          <ButtonLink to={ROUTES.templates} variant="secondary">
+            Volver a plantillas
+          </ButtonLink>
+        </aside>
+      </div>
     </section>
   );
 }

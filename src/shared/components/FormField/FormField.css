@@ -13,6 +13,15 @@
   color: var(--text-primary);
 }
 
+.form-field--label-hidden {
+  gap: 0;
+}
+
+.form-field__asterisk {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
 .form-field__required {
   padding: 0 var(--space-2);
   border-radius: var(--radius-full);

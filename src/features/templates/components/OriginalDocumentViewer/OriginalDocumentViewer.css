@@ -6,14 +6,54 @@
 
 .original-viewer__header {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
 }
 
 .original-viewer__title {
+  margin: 0;
   font-size: var(--font-size-lg);
+}
+
+.original-viewer__replace.button {
+  width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+}
+
+.original-viewer__file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.original-viewer__file-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.original-viewer__remove.button {
+  width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+}
+
+.original-viewer__filename {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.original-viewer__meta {
+  margin: var(--space-1) 0 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
 }
 
 .original-viewer__notice {

@@ -29,7 +29,7 @@ export default function Button({
       {...rest}
     >
       {loading && <Loader size="sm" label="Procesando" />}
-      <span>{children}</span>
+      <div className="button__label">{children}</div>
     </button>
   );
 }

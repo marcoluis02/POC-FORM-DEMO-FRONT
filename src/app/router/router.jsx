@@ -31,6 +31,13 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: ROUTES.inspections,
+        lazy: page(
+          () =>
+            import("@/features/responses/pages/InspectionsPage/InspectionsPage"),
+        ),
+      },
+      {
         path: ROUTES.templates,
         lazy: page(
           () =>

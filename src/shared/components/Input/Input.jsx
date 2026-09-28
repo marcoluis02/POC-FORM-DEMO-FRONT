@@ -2,9 +2,28 @@ import FormField from '@/shared/components/FormField/FormField';
 import { classNames } from '@/shared/utils/classNames';
 import './Input.css';
 
-export default function Input({ label, hint, error, required, id, unit, className, ...rest }) {
+export default function Input({
+  label,
+  hint,
+  error,
+  required,
+  requiredMark,
+  labelHidden,
+  id,
+  unit,
+  className,
+  ...rest
+}) {
   return (
-    <FormField label={label} hint={hint} error={error} required={required} id={id}>
+    <FormField
+      label={label}
+      hint={hint}
+      error={error}
+      required={required}
+      requiredMark={requiredMark}
+      labelHidden={labelHidden}
+      id={id}
+    >
       {({ id: inputId, describedBy, invalid }) => (
         <div className={classNames('input', unit && 'input--with-unit')}>
           <input

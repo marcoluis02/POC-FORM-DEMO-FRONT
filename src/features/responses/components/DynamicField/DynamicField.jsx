@@ -8,8 +8,8 @@ import PhotoField from '../PhotoField/PhotoField';
 import SignaturePlaceholderField from '../SignaturePlaceholderField/SignaturePlaceholderField';
 import './DynamicField.css';
 
-function AnswerControl({ field, value, error, disabled, onChange }) {
-  const common = { label: field.label, required: field.required, error, disabled };
+function AnswerControl({ field, label, value, error, disabled, onChange }) {
+  const common = { label, required: field.required, error, disabled };
 
   switch (field.type) {
     case FIELD_TYPES.YES_NO_NA:
@@ -28,7 +28,7 @@ function AnswerControl({ field, value, error, disabled, onChange }) {
     case FIELD_TYPES.CHECKBOX:
       return (
         <Checkbox
-          label={field.label}
+          label={label}
           hint={field.required ? 'Obligatorio: debes marcar esta casilla.' : undefined}
           error={error}
           disabled={disabled}
@@ -79,8 +79,9 @@ function AnswerControl({ field, value, error, disabled, onChange }) {
 }
 
 // Una pregunta del formulario. photos: { list, uploading, disabled, onUpload, onDelete, onUrlExpired }
-export default function DynamicField({ field, value, error, readOnly, photos, onChange }) {
+export default function DynamicField({ field, number, value, error, readOnly, photos, onChange }) {
   const disabled = readOnly || photos.disabled;
+  const questionLabel = number ? `${number} ${field.label}` : field.label;
   const photoProps = {
     attachments: photos.list,
     readOnly,
@@ -92,11 +93,11 @@ export default function DynamicField({ field, value, error, readOnly, photos, on
   };
 
   if (field.type === FIELD_TYPES.SIGNATURE_PLACEHOLDER) {
-    return <SignaturePlaceholderField label={field.label} />;
+    return <SignaturePlaceholderField label={questionLabel} />;
   }
   if (field.type === FIELD_TYPES.PHOTO) {
     return (
-      <PhotoField {...photoProps} label={field.label} required={field.required} error={error} />
+      <PhotoField {...photoProps} label={questionLabel} required={field.required} error={error} />
     );
   }
 
@@ -104,6 +105,7 @@ export default function DynamicField({ field, value, error, readOnly, photos, on
     <div className="dynamic-field">
       <AnswerControl
         field={field}
+        label={questionLabel}
         value={value}
         error={error}
         disabled={disabled}

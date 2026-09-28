@@ -10,7 +10,16 @@ import './TemplateEditor.css';
 
 // Editor completo de la plantilla. Recibe el borrador y el dispatch del reducer;
 // errors es un objeto { ruta: mensaje } (ver templateErrors.js).
-export default function TemplateEditor({ draft, dispatch, errors = {}, disabled = false }) {
+export default function TemplateEditor({
+  draft,
+  dispatch,
+  errors = {},
+  disabled = false,
+  showDetails = true,
+  showSections = true,
+  sectionIndex = null,
+  onSectionAdded,
+}) {
   const confirm = useConfirm();
   const toast = useToast();
   const canAddSection = draft.sections.length < TEMPLATE_LIMITS.maxSections;
@@ -39,9 +48,25 @@ export default function TemplateEditor({ draft, dispatch, errors = {}, disabled 
     toast.success('Pregunta eliminada.');
   };
 
+  const questionCount = draft.sections.reduce((total, section) => total + section.fields.length, 0);
+  const visibleSections = !showSections
+    ? []
+    : sectionIndex == null
+      ? draft.sections.map((section, index) => ({ section, index }))
+      : draft.sections[sectionIndex]
+        ? [{ section: draft.sections[sectionIndex], index: sectionIndex }]
+        : [];
+
   return (
     <div className="template-editor">
-      <div className="card">
+      {showDetails && (
+      <div className="card template-editor__intro">
+        <div className="template-editor__head">
+          <h2>Estructura del formulario</h2>
+          <p>
+            {draft.sections.length} secciones · {questionCount} preguntas
+          </p>
+        </div>
         <Input
           label="Nombre del formulario"
           placeholder="Ej. Revisión de mantenimiento"
@@ -50,13 +75,15 @@ export default function TemplateEditor({ draft, dispatch, errors = {}, disabled 
           error={errors[errorPaths.title]}
           disabled={disabled}
           required
+          requiredMark="asterisk"
           onChange={(event) =>
             dispatch({ type: EDITOR_ACTIONS.SET_TITLE, title: event.target.value })
           }
         />
       </div>
+      )}
 
-      {draft.sections.map((section, index) => (
+      {visibleSections.map(({ section, index }) => (
         <TemplateSection
           key={section.uid}
           section={section}
@@ -98,10 +125,14 @@ export default function TemplateEditor({ draft, dispatch, errors = {}, disabled 
         />
       ))}
 
-      {canAddSection && (
+      {canAddSection && visibleSections.length > 0 && (
         <Button
           variant="secondary"
-          onClick={() => dispatch({ type: EDITOR_ACTIONS.ADD_SECTION })}
+          onClick={() => {
+            const nextIndex = draft.sections.length;
+            dispatch({ type: EDITOR_ACTIONS.ADD_SECTION });
+            onSectionAdded?.(nextIndex);
+          }}
           disabled={disabled}
         >
           + Agregar sección

@@ -17,7 +17,7 @@ export default function ButtonLink({
       className={classNames('button', `button--${variant}`, `button--${size}`, className)}
       {...rest}
     >
-      <span>{children}</span>
+      <div className="button__label">{children}</div>
     </Link>
   );
 }
