@@ -57,8 +57,9 @@ async function fillNewTemplate(user) {
   await user.type(screen.getByLabelText(/Nombre del formulario/), 'Revisión de mantenimiento');
   await user.type(screen.getByLabelText(/Nombre de la sección/), 'General');
   await user.type(screen.getByLabelText(/^Pregunta/), '¿Se limpió el filtro?');
-  await user.selectOptions(screen.getByLabelText('Tipo de respuesta'), 'yes_no_na');
-  await user.click(screen.getByLabelText('Es obligatoria'));
+  await user.click(screen.getByLabelText('Tipo de respuesta'));
+  await user.click(screen.getByRole('option', { name: 'Sí / No / No aplica' }));
+  await user.click(screen.getByLabelText('Obligatorio'));
 }
 
 describe('TemplateReviewPage', () => {
@@ -464,6 +465,36 @@ describe('TemplateReviewPage — borrador generado por IA', () => {
       'href',
       `/imports/${IMPORT_ID}`,
     );
+  });
+
+  it('en celular el editor avanza por pasos', async () => {
+    const user = userEvent.setup();
+    window.matchMedia = vi.fn().mockImplementation((query) => ({
+      matches: true,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    renderReview('/templates/new');
+
+    expect(await screen.findByText('Paso 1 de 3 · Nombre del formulario (obligatorio)')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Nombre del formulario/)).toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    expect(document.querySelector('.template-review__original')).toHaveAttribute('hidden');
+
+    await user.click(screen.getByRole('button', { name: 'Siguiente' }));
+    expect(screen.getByText('Nombre del formulario: El formulario necesita un título.')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/Nombre del formulario/), 'Revisión');
+    await user.click(screen.getByRole('button', { name: 'Siguiente' }));
+    expect(screen.getByText('Paso 2 de 3 · Foto (opcional)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Elegir foto o PDF')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Siguiente' }));
+    expect(screen.getByText('Paso 3 de 3 · Contenido')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Nombre de la sección/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Guardar plantilla' })).toBeInTheDocument();
+    delete window.matchMedia;
   });
 
   it('no intenta renderizar un draft_json que viola FormDefinition', async () => {

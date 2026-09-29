@@ -1,9 +1,12 @@
 import { useMemo } from "react";
+import { ArrowLeftIcon, FileStackIcon } from "lucide-animated";
 import { useParams } from "react-router";
 import { paths } from "@/app/router/routes";
 import { useTemplateVersion } from "@/features/templates/hooks/useTemplateVersion";
+import AnimatedIcon from "@/shared/components/AnimatedIcon/AnimatedIcon";
 import Badge from "@/shared/components/Badge/Badge";
 import ButtonLink from "@/shared/components/ButtonLink/ButtonLink";
+import { useAnimatedIcon } from "@/shared/hooks/useAnimatedIcon";
 import ErrorState from "@/shared/components/ErrorState/ErrorState";
 import Loader from "@/shared/components/Loader/Loader";
 import { formatDateTime } from "@/shared/utils/formatDate";
@@ -32,6 +35,8 @@ function ResponseReport({ response, definition, onRefreshUrls }) {
     [response.attachments],
   );
   const submitted = response.status === RESPONSE_STATUS.SUBMITTED;
+  const backIcon = useAnimatedIcon();
+  const templateIcon = useAnimatedIcon();
 
   return (
     <div className="response-report">
@@ -40,14 +45,24 @@ function ResponseReport({ response, definition, onRefreshUrls }) {
           to={paths.responseDetail(response.id)}
           variant="ghost"
           size="sm"
+          onMouseEnter={backIcon.onMouseEnter}
+          onMouseLeave={backIcon.onMouseLeave}
+          onFocus={backIcon.onFocus}
+          onBlur={backIcon.onBlur}
         >
-          ← {submitted ? "Ver formulario" : "Volver a contestar"}
+          <AnimatedIcon icon={ArrowLeftIcon} iconRef={backIcon.ref} size={16} />
+          {submitted ? "Ver formulario" : "Volver a contestar"}
         </ButtonLink>
         <ButtonLink
           to={paths.templateDetail(response.template_id)}
           variant="ghost"
           size="sm"
+          onMouseEnter={templateIcon.onMouseEnter}
+          onMouseLeave={templateIcon.onMouseLeave}
+          onFocus={templateIcon.onFocus}
+          onBlur={templateIcon.onBlur}
         >
+          <AnimatedIcon icon={FileStackIcon} iconRef={templateIcon.ref} size={16} />
           Ver plantilla
         </ButtonLink>
       </div>

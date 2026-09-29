@@ -14,11 +14,14 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: var(--control-height);
-  height: var(--control-height);
+  min-width: 1.7rem;
+  height: 1.7rem;
+  padding: 0 0.35rem;
+  margin-top: 0.1rem;
   border-radius: var(--radius-full);
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
+  background: var(--color-surface-muted);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
 }
 

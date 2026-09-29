@@ -12,12 +12,74 @@
   gap: var(--space-4);
 }
 
+.templates-list__intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.templates-list__eyebrow {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.templates-list__title {
+  font-size: var(--font-size-3xl);
+}
+
+.templates-list__subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.templates-list .button.templates-list__create {
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  box-shadow: 0 10px 24px rgb(224 122 61 / 28%);
+}
+
+.templates-list .button.templates-list__create:not(:disabled):hover {
+  background: var(--color-accent-hover);
+}
+
+.templates-list__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.templates-list__search {
+  flex: 1 1 16rem;
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.templates-list__search:focus {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 .templates-list__items {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  margin: 0;
   padding: 0;
+  overflow: hidden;
   list-style: none;
+  border-radius: 28px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
 }
 
 .templates-list__more {
@@ -30,3 +92,28 @@
   font-weight: var(--font-weight-medium);
   text-align: center;
 }
+
+@media (max-width: 720px) {
+  .templates-list {
+    gap: var(--space-4);
+  }
+
+  .templates-list__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .templates-list__title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .templates-list .button.templates-list__create,
+  .templates-list__search {
+    width: 100%;
+  }
+
+  .templates-list__items {
+    border-radius: var(--radius-lg);
+  }
+}
+

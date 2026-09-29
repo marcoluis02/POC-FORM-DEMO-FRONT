@@ -50,9 +50,9 @@ h4 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *:not(.loader__spinner),
+  *:not(.loader__spinner)::before,
+  *:not(.loader__spinner)::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }

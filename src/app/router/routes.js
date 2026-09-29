@@ -3,6 +3,7 @@ import { generatePath } from "react-router";
 export const ROUTES = Object.freeze({
   home: "/",
   templates: "/templates",
+  inspections: "/inspections",
   importNew: "/imports/new",
   importDetail: "/imports/:importId",
   templateNew: "/templates/new",

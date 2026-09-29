@@ -1,5 +1,6 @@
 import { useEffect, useEffectEvent, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { classNames } from '@/shared/utils/classNames';
 import { getFocusableElements, keepFocusInside } from '@/shared/utils/focusTrap';
 import './Modal.css';
 
@@ -12,6 +13,10 @@ export default function Modal({
   footer,
   closeOnBackdrop = true,
   closeLabel = 'Cerrar',
+  wide = false,
+  className,
+  kicker,
+  description,
 }) {
   const dialogRef = useRef(null);
   const titleId = useId();
@@ -53,26 +58,46 @@ export default function Modal({
     <div className="modal__backdrop" onMouseDown={handleBackdropClick}>
       <div
         ref={dialogRef}
-        className="modal"
+        className={classNames('modal', wide && 'modal--wide', className)}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
       >
-        <header className="modal__header">
-          <h2 id={titleId} className="modal__title">
-            {title}
-          </h2>
-          {onClose && (
-            <button
-              type="button"
-              className="modal__close"
-              onClick={onClose}
-              aria-label={closeLabel}
-            >
-              ×
-            </button>
+        <header className={classNames('modal__header', kicker && 'modal__header--stacked')}>
+          {kicker && (
+            <div className="modal__kicker-row">
+              <div className="modal__kicker">{kicker}</div>
+              {onClose && (
+                <button
+                  type="button"
+                  className="modal__close"
+                  onClick={onClose}
+                  aria-label={closeLabel}
+                >
+                  ×
+                </button>
+              )}
+            </div>
           )}
+          <div className="modal__title-row">
+            <div>
+              <h2 id={titleId} className="modal__title">
+                {title}
+              </h2>
+              {description && <p className="modal__description">{description}</p>}
+            </div>
+            {!kicker && onClose && (
+              <button
+                type="button"
+                className="modal__close"
+                onClick={onClose}
+                aria-label={closeLabel}
+              >
+                ×
+              </button>
+            )}
+          </div>
         </header>
         <div className="modal__body">{children}</div>
         {footer && <footer className="modal__footer">{footer}</footer>}

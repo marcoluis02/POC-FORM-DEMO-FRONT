@@ -46,3 +46,19 @@ export function supportsOptions(type) {
 export function createEmptyOption() {
   return { value: '', label: '' };
 }
+
+const ANSWER_PREVIEW = Object.freeze({
+  [FIELD_TYPES.CHECKBOX]: 'Casilla para marcar',
+  [FIELD_TYPES.YES_NO_NA]: 'Sí, No o No aplica',
+  [FIELD_TYPES.SELECT]: 'Elige una opción',
+  [FIELD_TYPES.SHORT_TEXT]: 'Texto corto',
+  [FIELD_TYPES.LONG_TEXT]: 'Texto largo',
+  [FIELD_TYPES.NUMBER]: 'Número',
+  [FIELD_TYPES.DATE]: 'DD/MM/AAAA',
+  [FIELD_TYPES.PHOTO]: 'Foto',
+  [FIELD_TYPES.SIGNATURE_PLACEHOLDER]: 'Firma',
+});
+
+export function answerPreview(type) {
+  return ANSWER_PREVIEW[type] ?? '';
+}

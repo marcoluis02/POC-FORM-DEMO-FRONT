@@ -1,5 +1,28 @@
 .template-editor {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
+}
+
+.template-editor__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.template-editor__intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.template-editor__head h2 {
+  font-size: var(--font-size-lg);
+}
+
+.template-editor__head p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
 }

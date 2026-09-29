@@ -1,4 +1,6 @@
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from 'lucide-animated';
 import Button from '@/shared/components/Button/Button';
+import AnimatedIcon from '@/shared/components/AnimatedIcon/AnimatedIcon';
 import Input from '@/shared/components/Input/Input';
 import FieldEditor from '../FieldEditor/FieldEditor';
 import { errorPaths } from '../../domain/templateErrors';
@@ -44,52 +46,59 @@ export default function TemplateSection({
   return (
     <section className="template-section card" aria-labelledby={titleId}>
       <div className="template-section__header">
-        <h3 id={titleId} className="template-section__heading">
-          Sección {number}
-        </h3>
-        <div className="template-section__actions">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(MOVE_DIRECTION.UP)}
-            disabled={disabled || isFirst}
-            aria-label={`Subir sección ${number}`}
-          >
-            ↑ Subir
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(MOVE_DIRECTION.DOWN)}
-            disabled={disabled || isLast}
-            aria-label={`Bajar sección ${number}`}
-          >
-            ↓ Bajar
-          </Button>
-          {canRemove && (
+        <div className="template-section__header-row">
+          <h3 id={titleId} className="template-section__heading">
+            <span className="template-section__index">{number}</span>
+            <span className="template-section__name">Sección {number}</span>
+          </h3>
+          <span className="template-section__count">{section.fields.length} preguntas</span>
+        </div>
+        <div className="template-section__title">
+          <Input
+            label="Nombre de la sección"
+            placeholder="Escribe el nombre de la sección"
+            value={section.title}
+            maxLength={TEMPLATE_LIMITS.titleMaxLength}
+            error={errors[errorPaths.sectionTitle(index)]}
+            disabled={disabled}
+            onChange={(event) => onTitleChange(event.target.value)}
+          />
+          <div className="template-section__actions">
             <Button
-              variant="ghost-danger"
+              variant="ghost"
               size="sm"
-              onClick={onRemove}
-              disabled={disabled}
-              aria-label={`Eliminar sección ${number}`}
+              className="template-section__icon"
+              onClick={() => onMove(MOVE_DIRECTION.UP)}
+              disabled={disabled || isFirst}
+              aria-label={`Subir sección ${number}`}
             >
-              Eliminar sección
+              <AnimatedIcon icon={ChevronUpIcon} size={16} />
             </Button>
-          )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="template-section__icon"
+              onClick={() => onMove(MOVE_DIRECTION.DOWN)}
+              disabled={disabled || isLast}
+              aria-label={`Bajar sección ${number}`}
+            >
+              <AnimatedIcon icon={ChevronDownIcon} size={16} />
+            </Button>
+            {canRemove && (
+              <Button
+                variant="ghost-danger"
+                size="sm"
+                className="template-section__icon"
+                onClick={onRemove}
+                disabled={disabled}
+                aria-label={`Eliminar sección ${number}`}
+              >
+                <AnimatedIcon icon={DeleteIcon} size={16} />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
-
-      <Input
-        label="Nombre de la sección"
-        placeholder="Ej. General"
-        value={section.title}
-        maxLength={TEMPLATE_LIMITS.titleMaxLength}
-        error={errors[errorPaths.sectionTitle(index)]}
-        disabled={disabled}
-        required
-        onChange={(event) => onTitleChange(event.target.value)}
-      />
 
       {sectionError && (
         <p className="template-section__error" role="alert">
@@ -103,6 +112,7 @@ export default function TemplateSection({
             key={field.uid}
             field={field}
             number={fieldIndex + 1}
+            sectionNumber={number}
             isFirst={fieldIndex === 0}
             isLast={fieldIndex === section.fields.length - 1}
             canRemove={section.fields.length > 1}

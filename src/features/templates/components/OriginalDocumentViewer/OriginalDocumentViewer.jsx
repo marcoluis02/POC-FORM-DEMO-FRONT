@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { FilePenLineIcon, RefreshCcwIcon, XIcon } from 'lucide-animated';
+import AnimatedIcon from '@/shared/components/AnimatedIcon/AnimatedIcon';
 import Button from '@/shared/components/Button/Button';
 import { useConfirm } from '@/shared/components/ConfirmModal/useConfirm';
 import DocumentPreview from '@/shared/components/DocumentPreview/DocumentPreview';
@@ -6,10 +8,16 @@ import ErrorState from '@/shared/components/ErrorState/ErrorState';
 import FileUploader from '@/shared/components/FileUploader/FileUploader';
 import StoredDocument from '@/shared/components/StoredDocument/StoredDocument';
 import { useToast } from '@/shared/components/Toast/useToast';
+import { useAnimatedIcon } from '@/shared/hooks/useAnimatedIcon';
 import { DOCUMENT_UPLOAD, isPdf } from '@/shared/domain/documentUpload';
 import './OriginalDocumentViewer.css';
 
-const UPLOAD_HINT = `Opcional. Sube la foto o el PDF del formato en papel (JPG, PNG o PDF, máximo ${DOCUMENT_UPLOAD.maxSizeMb} MB y ${DOCUMENT_UPLOAD.maxPdfPages} páginas). Se guarda junto con la plantilla.`;
+const UPLOAD_HINT = `JPG, PNG o PDF. Máximo ${DOCUMENT_UPLOAD.maxSizeMb} MB.`;
+
+function formatSize(bytes) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 // Foto o PDF del formato en papel junto al editor.
 // file/fileUrl: archivo elegido que aún no se sube. storedImportId: documento ya guardado de la plantilla.
@@ -24,6 +32,7 @@ export default function OriginalDocumentViewer({
 }) {
   const confirm = useConfirm();
   const toast = useToast();
+  const replaceIcon = useAnimatedIcon();
   const [replacing, setReplacing] = useState(false);
   const [failedUrl, setFailedUrl] = useState(null);
 
@@ -52,29 +61,51 @@ export default function OriginalDocumentViewer({
     <section className="original-viewer card" aria-labelledby="original-viewer-title">
       <div className="original-viewer__header">
         <h2 id="original-viewer-title" className="original-viewer__title">
-          Documento original
+          Documento de referencia
         </h2>
-        {file && (
-          <Button variant="secondary" size="sm" onClick={handleClear} disabled={disabled}>
-            Quitar archivo
-          </Button>
-        )}
         {!file && storedImportId && allowReplace && (
           <Button
-            variant="secondary"
+            variant={replacing ? 'ghost-danger' : 'ghost'}
             size="sm"
+            className="original-viewer__replace"
             onClick={() => setReplacing((current) => !current)}
             disabled={disabled}
+            aria-label={replacing ? 'No reemplazar' : 'Reemplazar archivo'}
+            onMouseEnter={replaceIcon.onMouseEnter}
+            onMouseLeave={replaceIcon.onMouseLeave}
+            onFocus={replaceIcon.onFocus}
+            onBlur={replaceIcon.onBlur}
           >
-            {replacing ? 'No reemplazar' : 'Reemplazar archivo'}
+            <AnimatedIcon
+              icon={replacing ? XIcon : RefreshCcwIcon}
+              iconRef={replaceIcon.ref}
+              size={16}
+            />
           </Button>
         )}
       </div>
 
       {file && (
         <>
+          <div className="original-viewer__file">
+            <AnimatedIcon icon={FilePenLineIcon} size={22} />
+            <div className="original-viewer__file-text">
+              <p className="original-viewer__filename">{file.name}</p>
+              <p className="original-viewer__meta">{formatSize(file.size)}</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="original-viewer__remove"
+              onClick={handleClear}
+              disabled={disabled}
+              aria-label="Quitar archivo"
+            >
+              <AnimatedIcon icon={XIcon} size={16} />
+            </Button>
+          </div>
           <p className="original-viewer__notice text-small" role="status">
-            Archivo nuevo: se guardará al guardar la plantilla.
+            Se guarda junto con la plantilla.
           </p>
           {failedUrl === fileUrl ? (
             <ErrorState

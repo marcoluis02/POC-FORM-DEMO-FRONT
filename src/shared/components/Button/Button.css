@@ -81,3 +81,9 @@
 .button--ghost-danger:not(:disabled):hover {
   background: var(--color-danger-soft);
 }
+
+.button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
