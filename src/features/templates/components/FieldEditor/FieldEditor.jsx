@@ -126,6 +126,13 @@ export default function FieldEditor({
             onChange={(event) => onChange({ required: event.target.checked })}
           />
         </div>
+        <Checkbox
+          className="field-editor__evidence"
+          label="Permitir foto de evidencia"
+          checked={Boolean(field.allow_evidence)}
+          disabled={disabled}
+          onChange={(event) => onChange({ allow_evidence: event.target.checked })}
+        />
       </div>
 
       <p className="field-editor__preview" aria-hidden="true">
@@ -198,6 +205,7 @@ export default function FieldEditor({
           </ol>
         </div>
       )}
+
     </li>
   );
 }
